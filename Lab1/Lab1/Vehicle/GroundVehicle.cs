@@ -21,6 +21,13 @@ namespace Lab1.Vehicle
             }
             return !IsInRest;
         }
+
+        public override void Move(double time) {
+            if (canMove(time))
+            {
+                DistanceFromStart += Speed;
+            }
+        }
     }
 
     internal class PumpkinCarriage : GroundVehicle
@@ -29,13 +36,13 @@ namespace Lab1.Vehicle
         public override double MoveTime { get; set; } = 20;
         public override double RestTime { get; set; } = 5;
 
-        public override void Move(double time)
-        {
-            if (canMove(time))
-            {
+        // public override void Move(double time)
+        // {
+        //     if (canMove(time))
+        //     {
 
-            }
-        }
+        //     }
+        // }
     }
 
     internal class Centaur : GroundVehicle
@@ -45,13 +52,13 @@ namespace Lab1.Vehicle
 
         public override double RestTime { get; set; } = 3;
 
-        public override void Move(double time)
-        {
-            if (canMove(time))
-            {
+        // public override void Move(double time)
+        // {
+        //     if (canMove(time))
+        //     {
 
-            }
-        }
+        //     }
+        // }
     }
 
     internal class ChickenLegsHut : GroundVehicle
@@ -60,13 +67,13 @@ namespace Lab1.Vehicle
         public override double MoveTime { get; set; }= 15;
         public override double RestTime { get; set; } = 5;
 
-        public override void Move(double time)
-        {
-            if (canMove(time))
-            {
+        // public override void Move(double time)
+        // {
+        //     if (canMove(time))
+        //     {
 
-            }
-        }
+        //     }
+        // }
     }
 
     internal class MagicBoots : GroundVehicle
@@ -76,12 +83,12 @@ namespace Lab1.Vehicle
         public override double RestTime { get; set; } = 10;
 
 
-        public override void Move(double time)
-        {
-            if (canMove(time))
-            {
+        // public override void Move(double time)
+        // {
+        //     if (canMove(time))
+        //     {
 
-            }
-        }
+        //     }
+        // }
     }
 }
