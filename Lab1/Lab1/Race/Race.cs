@@ -37,7 +37,7 @@ namespace Lab1.Race
             if (Vehicles.Count < 2) {
                 throw new NoRaceParticipantsException();
             }
-            Console.WriteLine($"Starting race, distance: {Distance}");
+            Console.WriteLine($"Race has started!");
             double t = 0;
             List<Vehicle> finishedVehicles = [];
 
@@ -55,7 +55,6 @@ namespace Lab1.Race
                 }
                 t += 0.5;
             }
-            Console.WriteLine("done");
         }
 
     }

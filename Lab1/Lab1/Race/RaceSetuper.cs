@@ -69,7 +69,7 @@ namespace Lab1.Race
             };
             List<Vehicle> raceParticipants = [];
 
-            Console.WriteLine($"Select {(raceParticipants.Count == 0 ? "vehicle" : "more vehicles")} to register. Enter -1 to finish.");
+            Console.WriteLine($"Select vehicles to register. Enter -1 to finish.");
             for (int i = 0; i < availableTypes.Count; i++)
             {
                 Console.WriteLine($"{i + 1} - {availableTypes[i].GetType().Name} ({(availableTypes[i] is AirVehicle ? "Air type" : "Ground type")})");
