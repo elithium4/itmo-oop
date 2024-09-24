@@ -1,7 +1,7 @@
 ﻿
-namespace Lab1.Vehicle
+namespace Lab1.Vehicles
 {
-    internal abstract class AirVehicle : Vehicle
+    public abstract class AirVehicle : Vehicle
     {
         public abstract double CalculateAcceleration(double distance);
 
@@ -11,16 +11,16 @@ namespace Lab1.Vehicle
         }
     }
 
-    internal class Broom : AirVehicle
+    public class Broom : AirVehicle
     {
         public override double Speed { get; set; } = 5;
         public override double CalculateAcceleration(double distance)
         {
-            return distance / 5;
+            return distance / 50;
         }
     }
 
-    internal class BabaYagaMortar : AirVehicle
+    public class BabaYagaMortar : AirVehicle
     {
         public override double Speed { get; set; } = 7;
 
@@ -30,9 +30,9 @@ namespace Lab1.Vehicle
         }
     }
 
-    internal class FlyingShip : AirVehicle
+    public class FlyingShip : AirVehicle
     {
-        public override double Speed { get; set; } = 11;
+        public override double Speed { get; set; } = 41;
 
         public override double CalculateAcceleration(double distance)
         {
@@ -40,13 +40,13 @@ namespace Lab1.Vehicle
         }
     }
 
-    internal class MagicCarpet : AirVehicle
+    public class MagicCarpet : AirVehicle
     {
         public override double Speed { get; set; } = 8;
 
         public override double CalculateAcceleration(double distance)
         {
-            return Math.Sqrt(distance) * 0.5 + Math.Sqrt(Math.Sqrt(distance));
+            return Math.Sqrt(distance) + Math.Sqrt(Math.Sqrt(distance));
         }
     }
 }

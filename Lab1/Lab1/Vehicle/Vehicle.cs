@@ -1,8 +1,8 @@
 ﻿
 
-namespace Lab1.Vehicle
+namespace Lab1.Vehicles
 {
-    internal abstract class Vehicle
+    public abstract class Vehicle
     {
         public abstract void Move(double time);
         public double DistanceFromStart { set; get; } = 0;

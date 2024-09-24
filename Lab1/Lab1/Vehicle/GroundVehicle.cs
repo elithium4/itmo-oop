@@ -1,10 +1,10 @@
 ﻿
-namespace Lab1.Vehicle
+namespace Lab1.Vehicles
 {
-    internal abstract class GroundVehicle : Vehicle
+    public abstract class GroundVehicle : Vehicle
     {
         public abstract double MoveTime { set; get; }
-        public int RestCount {set; get; } = 0;
+        public int RestCount { set; get; } = 0;
         public bool IsInRest { set; get; } = false;
         public double LastRestEndTime { set; get; } = 0;
 
@@ -25,7 +25,8 @@ namespace Lab1.Vehicle
             return !IsInRest;
         }
 
-        public override void Move(double time) {
+        public override void Move(double time)
+        {
             if (canMove(time))
             {
                 DistanceFromStart += Speed;
@@ -33,7 +34,7 @@ namespace Lab1.Vehicle
         }
     }
 
-    internal class PumpkinCarriage : GroundVehicle
+    public class PumpkinCarriage : GroundVehicle
     {
         public override double Speed { get; set; } = 13;
         public override double MoveTime { get; set; } = 20;
@@ -44,36 +45,36 @@ namespace Lab1.Vehicle
         }
     }
 
-    internal class Centaur : GroundVehicle
+    public class Centaur : GroundVehicle
     {
-        public override double Speed { get; set; } = 3;
-        public override double MoveTime { get; set; } = 30;
+        public override double Speed { get; set; } = 7;
+        public override double MoveTime { get; set; } = 300;
 
         protected override double GetRestTime()
         {
-            return 3 / RestCount;
+            return RestCount > 0 ? 3 / RestCount : 3;
         }
     }
 
-    internal class ChickenLegsHut : GroundVehicle
+    public class ChickenLegsHut : GroundVehicle
     {
         public override double Speed { get; set; } = 5;
-        public override double MoveTime { get; set; }= 15;
+        public override double MoveTime { get; set; } = 150;
 
         protected override double GetRestTime()
         {
-            return 5 * RestCount * RestCount;
+            return 5 * Math.Sin(RestCount);
         }
     }
 
-    internal class MagicBoots : GroundVehicle
+    public class MagicBoots : GroundVehicle
     {
-        public override double Speed { get; set;  } = 4;
+        public override double Speed { get; set; } = 15;
         public override double MoveTime { get; set; } = 40;
 
         protected override double GetRestTime()
         {
-            return RestCount *  Math.Sin(RestCount);
+            return 1.1 * RestCount;
         }
     }
 }
