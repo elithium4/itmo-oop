@@ -20,24 +20,21 @@
 
         public void RegisterVehicle(Vehicle.Vehicle t)
         {
-            Console.WriteLine(t is Vehicle.AirVehicle);
-            Console.WriteLine(Type);
-            Console.WriteLine(t is Vehicle.GroundVehicle);
             if (Type == RaceType.MIXED || Type == RaceType.AIR && t is Vehicle.AirVehicle || Type == RaceType.GROUND && t is Vehicle.GroundVehicle)
             {
-                Console.WriteLine("add");
                 Vehicles.Add(t);
-                Console.WriteLine("OK");
             }
             else
             {
-                Console.WriteLine("Oops");
-                throw new Exception("Unsupported Vehicle for this race type");
+                throw new BadRaceParticipantException();
             }
         }
 
         public void StartRace()
         {
+            if (Vehicles.Count < 2) {
+                throw new NoRaceParticipantsException();
+            }
             Console.WriteLine($"Starting race, distance: {Distance}");
             double t = 0;
             List<Vehicle.Vehicle> finishedVehicles = [];

@@ -18,11 +18,6 @@ namespace Lab1.Vehicle
         {
             return distance / 5;
         }
-
-        // public override void Move(double time)
-        // {
-        //     DistanceFromStart += Speed + CalculateAcceleration(DistanceFromStart);
-        // }
     }
 
     internal class BabaYagaMortar : AirVehicle
@@ -33,11 +28,6 @@ namespace Lab1.Vehicle
         {
             return distance * 0.666 + 1;
         }
-
-        // public override void Move(double time)
-        // {
-        //     throw new NotImplementedException();
-        // }
     }
 
     internal class FlyingShip : AirVehicle
@@ -48,11 +38,6 @@ namespace Lab1.Vehicle
         {
             return 1;
         }
-
-        // public override void Move(double time)
-        // {
-        //     throw new NotImplementedException();
-        // }
     }
 
     internal class MagicCarpet : AirVehicle
@@ -63,10 +48,5 @@ namespace Lab1.Vehicle
         {
             return Math.Sqrt(distance) * 0.5 + Math.Sqrt(Math.Sqrt(distance));
         }
-
-        // public override void Move(double time)
-        // {
-        //     throw new NotImplementedException();
-        // }
     }
 }
