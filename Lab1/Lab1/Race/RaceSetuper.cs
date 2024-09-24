@@ -49,7 +49,7 @@ namespace Lab1.Race
                         return distance;
                     } else
                     {
-                        throw new BadRaceDistanceException();
+                        throw new NegativeRaceDistanceException();
                     }
                 }
             }

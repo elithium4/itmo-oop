@@ -2,12 +2,6 @@
 
 namespace Lab1.Race
 {
-    public enum RaceType
-    {
-        AIR,
-        GROUND,
-        MIXED
-    }
     public class Race
     {
         public RaceType Type { get; set; }
