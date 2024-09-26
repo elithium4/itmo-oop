@@ -2,8 +2,8 @@
 {
     public enum RaceType
     {
-        AIR,
-        GROUND,
-        MIXED
+        Air,
+        Ground,
+        Mixed
     }
 }

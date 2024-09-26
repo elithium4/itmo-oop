@@ -11,12 +11,15 @@ namespace Lab1.Race
         public Race(RaceType type, double distance)
         {
             Type = type;
+            if (distance <= 0) {
+                throw new NegativeRaceDistanceException();
+            }
             Distance = distance;
         }
 
         public void RegisterVehicle(Vehicle t)
         {
-            if (Type == RaceType.MIXED || Type == RaceType.AIR && t is AirVehicle || Type == RaceType.GROUND && t is GroundVehicle)
+            if (Type == RaceType.Mixed || Type == RaceType.Air && t is AirVehicle || Type == RaceType.Ground && t is GroundVehicle)
             {
                 Vehicles.Add(t);
             }

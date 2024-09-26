@@ -1,42 +1,37 @@
 
 using Lab1.Vehicles;
-using System.Linq;
 
 namespace Lab1.Race
 {
-    public class RaceSetuper()
+    public static class RaceSetuper
     {
-        public Race SetupRace()
+        public static Race SetupRace()
         {
             RaceType type = GetRaceType();
             double distance = GetRaceDistance();
             Race race = new Race(type, distance);
-            List<Vehicle> vehicles = SelectVehicles();
-            foreach (var item in vehicles)
-            {
-                race.RegisterVehicle(item);
-            }
+            RegisterVehicles(race);
             return race;
         }
 
-        private RaceType GetRaceType()
+        private static RaceType GetRaceType()
         {
-            Console.WriteLine("Select race type: AIR, GROUND or MIXED");
+            Console.WriteLine("Select race type: Air, Ground or Mixed");
             while (true)
             {
                 RaceType selectedRaceType;
-                if (Enum.TryParse(Console.ReadLine(), out selectedRaceType))
+                if (Enum.TryParse(Console.ReadLine(), true, out selectedRaceType))
                 {
                     return selectedRaceType;
                 }
                 else
                 {
-                    throw new BadRaceTypeException();
+                    Console.WriteLine("Couldn't recognize race type, try again");
                 }
             }
         }
 
-        private double GetRaceDistance()
+        private static double GetRaceDistance()
         {
             while (true)
             {
@@ -47,15 +42,16 @@ namespace Lab1.Race
                     if (distance > 0)
                     {
                         return distance;
-                    } else
+                    }
+                    else
                     {
-                        throw new NegativeRaceDistanceException();
+                        Console.WriteLine("Race distance must be positive");
                     }
                 }
             }
         }
 
-        private List<Vehicle> SelectVehicles()
+        private static void RegisterVehicles(Race race)
         {
             List<Vehicle> availableTypes = new List<Vehicle> {
                 new Broom(),
@@ -69,13 +65,14 @@ namespace Lab1.Race
             };
             List<Vehicle> raceParticipants = [];
 
-            Console.WriteLine($"Select vehicles to register. Enter -1 to finish.");
+            Console.WriteLine("Select vehicles to register. Enter -1 to finish.");
             for (int i = 0; i < availableTypes.Count; i++)
             {
                 Console.WriteLine($"{i + 1} - {availableTypes[i].GetType().Name} ({(availableTypes[i] is AirVehicle ? "Air type" : "Ground type")})");
             }
 
             int possibleParticipants = availableTypes.Count;
+            int registeredParticipants = 0;
 
             while (possibleParticipants > 0)
             {
@@ -86,7 +83,14 @@ namespace Lab1.Race
                 }
                 if (choice == -1)
                 {
-                    break;
+                    if (registeredParticipants < 2)
+                    {
+                        Console.WriteLine("You must register at least 2 participants");
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 else
                 {
@@ -97,13 +101,20 @@ namespace Lab1.Race
                     }
                     else
                     {
-                        raceParticipants.Add(vehicle);
-                        possibleParticipants--;
-                        Console.WriteLine($"New participant: {vehicle.GetType().Name}");
+                        try
+                        {
+                            race.RegisterVehicle(vehicle);
+                            Console.WriteLine($"New participant registered: {vehicle.GetType().Name}");
+                            possibleParticipants--;
+                            registeredParticipants++;
+                        }
+                        catch (BadRaceParticipantException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                     }
                 }
             }
-            return raceParticipants;
         }
     }
 }
