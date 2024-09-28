@@ -20,7 +20,7 @@ namespace Lab1.Race
             while (true)
             {
                 RaceType selectedRaceType;
-                if (Enum.TryParse(Console.ReadLine(), true, out selectedRaceType))
+                if (Enum.TryParse(Console.ReadLine(), true, out selectedRaceType) && Enum.IsDefined<RaceType>(selectedRaceType))
                 {
                     return selectedRaceType;
                 }
