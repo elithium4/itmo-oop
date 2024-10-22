@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace MusicCatalog.Entities
 {
-    internal class Genre : IHasName
+    internal interface IHasName
     {
-        public int Id { get; set; }
-        public string Name {  get; set; }
-
+        string Name { get; }
     }
 }
