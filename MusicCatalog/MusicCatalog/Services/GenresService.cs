@@ -1,16 +1,11 @@
 ﻿using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCatalog.Services
 {
     internal class GenresService : EntityService
     {
-        private UnitOfWork _unitOfWork;
+        //private UnitOfWork _unitOfWork;
 
         public GenresService(UnitOfWork unitOfWork)
         {
@@ -57,6 +52,11 @@ namespace MusicCatalog.Services
         }
         public override void DeleteOne()
         {
+            if (_unitOfWork.Genres.GetAll().Count == 0)
+            {
+                Console.WriteLine("Нет жанров, чтобы что-то удалять");
+                return;
+            }
             Console.WriteLine("Введите ID жанра для удаления");
             int id;
             if (int.TryParse(Console.ReadLine(), out id))

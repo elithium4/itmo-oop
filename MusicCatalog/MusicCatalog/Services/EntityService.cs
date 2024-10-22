@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MusicCatalog.Repositories;
 
 namespace MusicCatalog.Services
 {
     internal abstract class EntityService
     {
+        protected UnitOfWork _unitOfWork;
         public abstract void GetAll();
         public abstract void DeleteOne();
         public abstract void AddOne();

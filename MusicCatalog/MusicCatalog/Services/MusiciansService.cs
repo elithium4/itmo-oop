@@ -1,16 +1,11 @@
 ﻿using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCatalog.Services
 {
-    internal class MusiciansService : EntityService
+    internal class MusiciansService : ExtendedEntityService
     {
-        private UnitOfWork _unitOfWork;
+        //private UnitOfWork _unitOfWork;
 
         public MusiciansService(UnitOfWork unitOfWork)
         {
@@ -58,6 +53,11 @@ namespace MusicCatalog.Services
 
         public override void DeleteOne()
         {
+            if (_unitOfWork.Musicians.GetAll().Count == 0)
+            {
+                Console.WriteLine("Нет исполнителей, чтобы что-то удалять");
+                return;
+            }
             Console.WriteLine("Введите ID исполнителя для удаления");
             int name;
             if (int.TryParse(Console.ReadLine(), out name))
@@ -80,7 +80,7 @@ namespace MusicCatalog.Services
             }
         }
 
-        public void GetOne()
+        public override void GetOne()
         {
             Console.WriteLine("Введите ID исполнителя, либо -1 чтобы выйти");
             int id;
@@ -128,6 +128,31 @@ namespace MusicCatalog.Services
             {
                 Console.WriteLine("------Синглы------");
                 singles.ForEach(t => Console.WriteLine($"{t.Name}"));
+            }
+        }
+
+        public void Search()
+        {
+            var musicians = _unitOfWork.Musicians.GetAll();
+            if (musicians.Count == 0)
+            {
+                Console.WriteLine("Нет исполнителей для поиска");
+                return;
+            }
+            Console.Write("Введите запрос или -1 для выхода: ");
+            string query = Console.ReadLine();
+            if (query == "-1")
+            {
+                return;
+            }
+            var results = musicians.Where(m => m.Name.ToLower().Contains(query.ToLower())).ToList();
+            if (results.Count == 0)
+            {
+                Console.WriteLine("Нет результатов");
+            }
+            else
+            {
+                results.ForEach(m => Console.WriteLine($"{m.Id} {m.Name}"));
             }
         }
 

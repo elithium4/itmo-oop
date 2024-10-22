@@ -1,13 +1,12 @@
 ﻿using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
 using MusicCatalog.Utils;
-using System.Diagnostics;
 
 namespace MusicCatalog.Services
 {
-    internal class AlbumService: EntityService
+    internal class AlbumService: ExtendedEntityService
     {
-        private UnitOfWork _unitOfWork;
+        //private UnitOfWork _unitOfWork;
 
         public AlbumService(UnitOfWork unitOfWork)
         {
@@ -23,7 +22,7 @@ namespace MusicCatalog.Services
             });
         }
 
-        public void GetOne()
+        public override void GetOne()
         {
             Console.WriteLine("Введите ID альбома для получения информации");
             int id;
@@ -138,6 +137,11 @@ namespace MusicCatalog.Services
 
         public override void DeleteOne()
         {
+            if (_unitOfWork.Albums.GetAll().Count == 0)
+            {
+                Console.WriteLine("Нет альбомов, чтобы что-то удалять");
+                return;
+            }
             Console.WriteLine("Введите ID альбома для удаления");
             int id;
             if (int.TryParse(Console.ReadLine(), out id))
@@ -221,6 +225,31 @@ namespace MusicCatalog.Services
 
             }
             return tracks;
+        }
+
+        public void Search()
+        {
+            var albums = _unitOfWork.Albums.GetAll();
+            if (albums.Count == 0)
+            {
+                Console.WriteLine("Нет альбомов для поиска");
+                return;
+            }
+            Console.Write("Введите запрос или -1 для выхода: ");
+            string query = Console.ReadLine();
+            if (query == "-1")
+            {
+                return;
+            }
+            var results = albums.Where(m => m.Name.ToLower().Contains(query.ToLower())).ToList();
+            if (results.Count == 0)
+            {
+                Console.WriteLine("Нет результатов");
+            }
+            else
+            {
+                results.ForEach(m => Console.WriteLine($"{m.Id} {m.Name}"));
+            }
         }
     }
 }

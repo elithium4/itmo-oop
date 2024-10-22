@@ -1,9 +1,4 @@
 ﻿using MusicCatalog.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCatalog.Services
 {
@@ -14,6 +9,7 @@ namespace MusicCatalog.Services
         private readonly MusiciansService _musiciansService;
         private readonly TracksService _tracksService;
         private readonly AlbumService _albumService;
+        private readonly TracksCollectionService _tracksCollectionService;
         public InteractionService(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -21,6 +17,7 @@ namespace MusicCatalog.Services
             _musiciansService = new MusiciansService(unitOfWork);
             _tracksService = new TracksService(unitOfWork);
             _albumService = new AlbumService(unitOfWork);
+            _tracksCollectionService = new TracksCollectionService(unitOfWork);
 
         }
         public void Greet()
@@ -35,7 +32,7 @@ namespace MusicCatalog.Services
                 Console.WriteLine("1 - Альбомы");
                 Console.WriteLine("2 - Треки");
                 Console.WriteLine("3 - Исполнители");
-                Console.WriteLine("4 - Коллекции треков");
+                Console.WriteLine("4 - Сборники треков");
                 Console.WriteLine("5 - Жанры");
                 int action;
                 if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 5)
@@ -117,9 +114,10 @@ namespace MusicCatalog.Services
                 Console.WriteLine("2 - Добавить исполнителя");
                 Console.WriteLine("3 - Удалить исполнителя");
                 Console.WriteLine("4 - Перейти к информации об исполнителе");
-                Console.WriteLine("5 - Вернуться в меню разделов");
+                Console.WriteLine("5 - Поиск по исполнителям");
+                Console.WriteLine("6 - Вернуться в меню разделов");
                 int action;
-                if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 5)
+                if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 6)
                 {
                     switch (action)
                     {
@@ -136,6 +134,9 @@ namespace MusicCatalog.Services
                             _musiciansService.GetOne();
                             break;
                         case 5:
+                            _musiciansService.Search();
+                            break;
+                        case 6:
                             inMenu = false;
                             break;
                         default:
@@ -159,7 +160,8 @@ namespace MusicCatalog.Services
                 Console.WriteLine("1 - Посмотреть список треков");
                 Console.WriteLine("2 - Добавить трек");
                 Console.WriteLine("3 - Удалить трек");
-                Console.WriteLine("4 - Вернуться в меню разделов");
+                Console.WriteLine("4 - Поиск по трекам");
+                Console.WriteLine("5 - Вернуться в меню разделов");
                 int action;
                 if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 5)
                 {
@@ -175,6 +177,9 @@ namespace MusicCatalog.Services
                             _tracksService.DeleteOne();
                             break;
                         case 4:
+                            _tracksService.Search();
+                            break;
+                        case 5:
                             inMenu = false;
                             break;
                         default:
@@ -200,9 +205,10 @@ namespace MusicCatalog.Services
                 Console.WriteLine("3 - Удалить альбом");
                 Console.WriteLine("4 - Перейти к информации об альбоме");
                 Console.WriteLine("5 - Добавить треки в существующий альбом");
-                Console.WriteLine("6 - Вернуться в меню разделов");
+                Console.WriteLine("6 - Поиск по альбомам");
+                Console.WriteLine("7 - Вернуться в меню разделов");
                 int action;
-                if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 6)
+                if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 7)
                 {
                     switch (action)
                     {
@@ -222,6 +228,9 @@ namespace MusicCatalog.Services
                             _albumService.AddTracksToExisting();
                             break;
                         case 6:
+                            _albumService.Search();
+                            break;
+                        case 7:
                             inMenu = false;
                             break;
                         default:
@@ -238,7 +247,53 @@ namespace MusicCatalog.Services
 
         public void HandleCollections()
         {
-
+            var inMenu = true;
+            while (inMenu)
+            {
+                Console.WriteLine("Выберите действие:");
+                Console.WriteLine("1 - Посмотреть список сборников");
+                Console.WriteLine("2 - Добавить сборник");
+                Console.WriteLine("3 - Удалить сборник");
+                Console.WriteLine("4 - Перейти к информации о сборнике");
+                Console.WriteLine("5 - Добавить треки в существующий сборник");
+                Console.WriteLine("6 - Поиск по сборнику");
+                Console.WriteLine("7 - Вернуться в меню разделов");
+                int action;
+                if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 7)
+                {
+                    switch (action)
+                    {
+                        case 1:
+                            _tracksCollectionService.GetAll();
+                            break;
+                        case 2:
+                            _tracksCollectionService.AddOne();
+                            break;
+                        case 3:
+                            _tracksCollectionService.DeleteOne();
+                            break;
+                        case 4:
+                            _tracksCollectionService.GetOne();
+                            break;
+                        case 5:
+                            _tracksCollectionService.AddMoreTracks();
+                            break;
+                        case 6:
+                            _tracksCollectionService.Search();
+                            break;
+                        case 7:
+                            inMenu = false;
+                            break;
+                        default:
+                            Console.WriteLine("Попробуйте еще раз");
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Попробуйте еще раз");
+                }
+            }
         }
     }
 }

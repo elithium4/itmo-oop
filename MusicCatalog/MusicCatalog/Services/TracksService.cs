@@ -6,7 +6,6 @@ namespace MusicCatalog.Services
 {
     internal class TracksService: EntityService
     {
-        private UnitOfWork _unitOfWork;
 
         public TracksService(UnitOfWork unitOfWork)
         {
@@ -155,6 +154,11 @@ namespace MusicCatalog.Services
         }
         public override void DeleteOne()
         {
+            if (_unitOfWork.Tracks.GetAll().Count == 0)
+            {
+                Console.WriteLine("Нет треков, чтобы что-то удалять");
+                return;
+            }
             Console.WriteLine("Введите ID трека для удаления");
             int id;
             if (int.TryParse(Console.ReadLine(), out id))
@@ -174,6 +178,78 @@ namespace MusicCatalog.Services
             else
             {
                 Console.WriteLine("Удаление отменено");
+            }
+        }
+
+        public void Search()
+        {
+            Console.WriteLine("Выберите критерий поиска:");
+            Console.WriteLine("1 - по названию");
+            Console.WriteLine("2 - по исполнителю");
+            Console.WriteLine("3 - по жанру");
+            Console.WriteLine("Для выхода введите любое другое значение");
+            int action;
+            if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 3)
+            {
+                switch (action)
+                {
+                    case 1:
+                        SearchByName();
+                        break;
+                    case 2:
+                        SearchByMusician();
+                        break;
+                    case 3:
+                        SearchByGenre();
+                        break;
+                    default:
+                        Console.WriteLine("Неизвестный критерий");
+                        break;
+                }
+            }
+        }
+
+        private void SearchByName()
+        {
+            Console.Write("Введите запрос: ");
+            string query = Console.ReadLine().ToLower();
+            var tracks = _unitOfWork.Tracks.GetAll().Where(t => t.Name.ToLower().Contains(query)).ToList();
+            if (tracks.Count == 0)
+            {
+                Console.WriteLine("Нет результатов");
+            } else
+            {
+                tracks.ForEach(t => Console.WriteLine($"{t.Id}      {t.Name}    {Formatter.FormatArtists(t.Musicians)}"));
+            }
+        }
+
+        private void SearchByMusician()
+        {
+            Console.Write("Введите запрос: ");
+            string query = Console.ReadLine().ToLower();
+            var tracks = _unitOfWork.Tracks.GetAll().Where(t => t.Musicians.Any(m => m.Name.ToLower().Contains(query))).ToList();
+            if (tracks.Count == 0)
+            {
+                Console.WriteLine("Нет результатов");
+            }
+            else
+            {
+                tracks.ForEach(t => Console.WriteLine($"{t.Id}      {t.Name}    {Formatter.FormatArtists(t.Musicians)}"));
+            }
+        }
+
+        private void SearchByGenre()
+        {
+            Console.Write("Введите название жанра");
+            string genre = Console.ReadLine().ToLower();
+            var tracks = _unitOfWork.Tracks.GetAll().Where(t => t.Genre.Name == genre).ToList();
+            if (tracks.Count == 0)
+            {
+                Console.WriteLine("Нет результатов");
+            }
+            else
+            {
+                tracks.ForEach(t => Console.WriteLine($"{t.Id}      {t.Name}    {Formatter.FormatArtists(t.Musicians)}"));
             }
         }
 
