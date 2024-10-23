@@ -1,10 +1,11 @@
-﻿using MusicCatalog.Entities;
+﻿using ConsoleTables;
+using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
 using MusicCatalog.Utils;
 
 namespace MusicCatalog.Services
 {
-    internal class TracksService: EntityService
+    internal class TracksService: EntityService<Track>
     {
 
         public TracksService(UnitOfWork unitOfWork)
@@ -144,8 +145,8 @@ namespace MusicCatalog.Services
             var entities = _unitOfWork.Tracks.GetAll();
             if (entities.Count > 0)
             {
-                Console.WriteLine("ID        Название       Длительность        Альбом      Исполнители");
-                entities.ForEach(e => Console.WriteLine($"{e.Id}         {e.Name}       {Formatter.FormatDuration(e.Duration)}    {(e.Album != null ? e.Album.Name : "-")}    {Formatter.FormatArtists(e.Musicians)}"));
+                PrintAll(entities);
+                
             }
             else
             {
@@ -225,7 +226,7 @@ namespace MusicCatalog.Services
                 Console.WriteLine("Нет результатов");
             } else
             {
-                tracks.ForEach(t => Console.WriteLine($"{t.Id}      {t.Name}    {Formatter.FormatArtists(t.Musicians)}"));
+                PrintAll(tracks);
             }
         }
 
@@ -240,7 +241,7 @@ namespace MusicCatalog.Services
             }
             else
             {
-                tracks.ForEach(t => Console.WriteLine($"{t.Id}      {t.Name}    {Formatter.FormatArtists(t.Musicians)}"));
+                PrintAll(tracks);
             }
         }
 
@@ -255,8 +256,17 @@ namespace MusicCatalog.Services
             }
             else
             {
-                tracks.ForEach(t => Console.WriteLine($"{t.Id}      {t.Name}    {Formatter.FormatArtists(t.Musicians)}"));
+                PrintAll(tracks);
             }
+        }
+
+        public override void PrintAll(List<Track> tracks)
+        {
+            var table = new ConsoleTable("ID", "Название", "Длительность", "Альбом", "Исполнители").Configure(o => o.EnableCount = false);
+
+            tracks.ForEach(e => table.AddRow(e.Id, e.Name, Formatter.FormatDuration(e.Duration), e.Album != null ? e.Album.Name : "-", Formatter.FormatArtists(e.Musicians)));
+            table.Write();
+            Console.WriteLine();
         }
 
     }

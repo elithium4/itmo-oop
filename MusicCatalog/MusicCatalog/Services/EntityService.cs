@@ -2,7 +2,7 @@
 
 namespace MusicCatalog.Services
 {
-    internal abstract class EntityService
+    internal abstract class EntityService<T> where T: class
     {
         protected UnitOfWork _unitOfWork;
         public abstract void GetAll();
@@ -11,6 +11,7 @@ namespace MusicCatalog.Services
 
         public abstract bool CheckIfDataPresent();
 
+        public abstract void PrintAll(List<T> entities);
         public bool getConfirmation()
         {
             while (true)

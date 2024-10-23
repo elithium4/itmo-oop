@@ -1,9 +1,10 @@
-﻿using MusicCatalog.Entities;
+﻿using ConsoleTables;
+using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
 
 namespace MusicCatalog.Services
 {
-    internal class GenresService : EntityService
+    internal class GenresService : EntityService<Genre>
     {
         //private UnitOfWork _unitOfWork;
 
@@ -42,8 +43,7 @@ namespace MusicCatalog.Services
             var genres = _unitOfWork.Genres.GetAll();
             if (CheckIfDataPresent())
             {
-                Console.WriteLine("ID        Name");
-                genres.ForEach(g => Console.WriteLine($"{g.Id}         {g.Name}"));
+                PrintAll(genres);
             }
         
         }
@@ -82,6 +82,15 @@ namespace MusicCatalog.Services
                 return false;
             }
             return true;
+        }
+
+        public override void PrintAll(List<Genre> entities)
+        {
+            var table = new ConsoleTable("ID", "Название").Configure(o => o.EnableCount = false);
+
+            entities.ForEach(e => table.AddRow(e.Id, e.Name));
+            table.Write();
+            Console.WriteLine();
         }
     }
 }

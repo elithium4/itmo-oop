@@ -1,10 +1,11 @@
-﻿using MusicCatalog.Entities;
+﻿using ConsoleTables;
+using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
 using MusicCatalog.Utils;
 
 namespace MusicCatalog.Services
 {
-    internal class AlbumService : ExtendedEntityService
+    internal class AlbumService : ExtendedEntityService<Album>
     {
         //private UnitOfWork _unitOfWork;
 
@@ -18,11 +19,8 @@ namespace MusicCatalog.Services
             var entities = _unitOfWork.Albums.GetAll();
             if (entities.Count > 0)
             {
-                Console.WriteLine("ID       Название        Треков всего        Исполнители");
-                entities.ForEach(album =>
-                {
-                    Console.WriteLine($"{album.Id}      {album.Name}        {album.Tracks.Count}        {Formatter.FormatArtists(album.Musicians)}");
-                });
+
+                PrintAll(entities);
             }
             else
             {
@@ -269,8 +267,17 @@ namespace MusicCatalog.Services
             }
             else
             {
-                results.ForEach(m => Console.WriteLine($"{m.Id} {m.Name}"));
+                PrintAll(results);
             }
+        }
+
+        public override void PrintAll(List<Album> entities)
+        {
+            var table = new ConsoleTable("ID", "Название", "Исполнитель", "Треков всего").Configure(o => o.EnableCount = false);
+
+            entities.ForEach(e => table.AddRow(e.Id, e.Name, Formatter.FormatArtists(e.Musicians), e.Tracks.Count));
+            table.Write();
+            Console.WriteLine();
         }
     }
 }

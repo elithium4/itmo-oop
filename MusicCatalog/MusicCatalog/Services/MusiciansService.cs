@@ -1,9 +1,10 @@
-﻿using MusicCatalog.Entities;
+﻿using ConsoleTables;
+using MusicCatalog.Entities;
 using MusicCatalog.Repositories;
 
 namespace MusicCatalog.Services
 {
-    internal class MusiciansService : ExtendedEntityService
+    internal class MusiciansService : ExtendedEntityService<Musician>
     {
         //private UnitOfWork _unitOfWork;
 
@@ -17,8 +18,7 @@ namespace MusicCatalog.Services
             var musicians = _unitOfWork.Musicians.GetAll();
             if (musicians.Count > 0)
             {
-                Console.WriteLine("ID        Name");
-                musicians.ForEach(m => Console.WriteLine($"{m.Id}         {m.Name}"));
+                PrintAll(musicians);
             }
             else
             {
@@ -155,8 +155,17 @@ namespace MusicCatalog.Services
             }
             else
             {
-                results.ForEach(m => Console.WriteLine($"{m.Id} {m.Name}"));
+                PrintAll(results);
             }
+        }
+
+        public override void PrintAll(List<Musician> entities)
+        {
+            var table = new ConsoleTable("ID", "Имя").Configure(o => o.EnableCount = false);
+
+            entities.ForEach(e => table.AddRow(e.Id, e.Name));
+            table.Write();
+            Console.WriteLine();
         }
 
     }
