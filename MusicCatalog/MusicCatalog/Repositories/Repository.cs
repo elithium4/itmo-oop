@@ -1,29 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MusicCatalog.Entities;
 
 namespace MusicCatalog.Repositories
 {
-    internal class Repository<T> where T : class 
+    internal abstract class Repository<T> where T : class
     {
-        private MusicCatalogContext _context;
-        private DbSet<T> _table;
-
+        protected MusicCatalogContext _context;
+        protected DbSet<T> _table;
         public Repository(MusicCatalogContext context)
         {
             _context = context;
             _table = _context.Set<T>();
         }
 
-        public T Get(int id)
-        {
-            return _table.Find(id);
-        }
+        public abstract T Get(int id);
 
-        public List<T> GetAll()
-        {
-            return _table.ToList();
-        }
-
+        public abstract List<T> GetAll();
         public void Add(T entity)
         {
             _table.Add(entity);
