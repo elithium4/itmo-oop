@@ -12,7 +12,7 @@ namespace MusicCatalog
         public DbSet<TracksCollection> TracksCollection { get; set; } = null!;
         public MusicCatalogContext()
         {
-            Database.EnsureDeleted();
+            // Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -59,7 +59,7 @@ namespace MusicCatalog
             //modelBuilder.Entity<Musician>().HasData(musicians);
 
 
-
+            modelBuilder.Entity<Album>().HasMany(e => e.Tracks).WithOne(e => e.Album);
 
             // Заполнение альбомов
             //modelBuilder.Entity<Album>().HasMany(e => e.Musicians)

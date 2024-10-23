@@ -4,7 +4,7 @@ using MusicCatalog.Utils;
 
 namespace MusicCatalog.Services
 {
-    internal class AlbumService: ExtendedEntityService
+    internal class AlbumService : ExtendedEntityService
     {
         //private UnitOfWork _unitOfWork;
 
@@ -15,15 +15,24 @@ namespace MusicCatalog.Services
 
         public override void GetAll()
         {
-            Console.WriteLine("ID       Название        Треков всего        Исполнители");
-            _unitOfWork.Albums.GetAll().ForEach(album =>
+            var entities = _unitOfWork.Albums.GetAll();
+            if (entities.Count > 0)
             {
-                Console.WriteLine($"{album.Id}      {album.Name}        {album.Tracks.Count}        {Formatter.FormatArtists(album.Musicians)}");
-            });
+                Console.WriteLine("ID       Название        Треков всего        Исполнители");
+                entities.ForEach(album =>
+                {
+                    Console.WriteLine($"{album.Id}      {album.Name}        {album.Tracks.Count}        {Formatter.FormatArtists(album.Musicians)}");
+                });
+            }
+            else
+            {
+                Console.WriteLine("Нет добавленных альбомов");
+            }
         }
 
         public override void GetOne()
         {
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID альбома для получения информации");
             int id;
             Album album;
@@ -137,9 +146,8 @@ namespace MusicCatalog.Services
 
         public override void DeleteOne()
         {
-            if (_unitOfWork.Albums.GetAll().Count == 0)
+            if (!CheckIfDataPresent())
             {
-                Console.WriteLine("Нет альбомов, чтобы что-то удалять");
                 return;
             }
             Console.WriteLine("Введите ID альбома для удаления");
@@ -166,6 +174,9 @@ namespace MusicCatalog.Services
 
         public void AddTracksToExisting()
         {
+            if (!CheckIfDataPresent()) {
+                return;
+            }
             Console.WriteLine("Введите ID альбома, в который нужно добавить треки");
             int id;
             while (true)
@@ -177,7 +188,8 @@ namespace MusicCatalog.Services
                     album.Tracks.AddRange(tracks);
                     _unitOfWork.Save();
                     return;
-                } else
+                }
+                else
                 {
                     Console.WriteLine("Попробуйте еще раз");
                 }
@@ -227,12 +239,21 @@ namespace MusicCatalog.Services
             return tracks;
         }
 
-        public void Search()
-        {
+        public override bool CheckIfDataPresent() {
             var albums = _unitOfWork.Albums.GetAll();
             if (albums.Count == 0)
             {
-                Console.WriteLine("Нет альбомов для поиска");
+                Console.WriteLine("Нет добавленных альбомов");
+                return false;
+            }
+            return true;
+        }
+
+        public void Search()
+        {
+            var albums = _unitOfWork.Albums.GetAll();
+            if (!CheckIfDataPresent())
+            {
                 return;
             }
             Console.Write("Введите запрос или -1 для выхода: ");

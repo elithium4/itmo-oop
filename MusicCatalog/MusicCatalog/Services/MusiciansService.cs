@@ -22,7 +22,7 @@ namespace MusicCatalog.Services
             }
             else
             {
-                Console.WriteLine("Нет сохраненных артистов");
+                Console.WriteLine("Нет добавленных исполнителей");
             }
         }
 
@@ -53,11 +53,7 @@ namespace MusicCatalog.Services
 
         public override void DeleteOne()
         {
-            if (_unitOfWork.Musicians.GetAll().Count == 0)
-            {
-                Console.WriteLine("Нет исполнителей, чтобы что-то удалять");
-                return;
-            }
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID исполнителя для удаления");
             int name;
             if (int.TryParse(Console.ReadLine(), out name))
@@ -82,6 +78,7 @@ namespace MusicCatalog.Services
 
         public override void GetOne()
         {
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID исполнителя, либо -1 чтобы выйти");
             int id;
             Musician musician;
@@ -131,14 +128,20 @@ namespace MusicCatalog.Services
             }
         }
 
-        public void Search()
-        {
+        public override bool CheckIfDataPresent() {
             var musicians = _unitOfWork.Musicians.GetAll();
             if (musicians.Count == 0)
             {
-                Console.WriteLine("Нет исполнителей для поиска");
-                return;
+                Console.WriteLine("Нет добавленных исполнителей");
+                return false;
             }
+            return true;
+        }
+
+        public void Search()
+        {
+            if (!CheckIfDataPresent()) return;
+            var musicians = _unitOfWork.Musicians.GetAll();
             Console.Write("Введите запрос или -1 для выхода: ");
             string query = Console.ReadLine();
             if (query == "-1")

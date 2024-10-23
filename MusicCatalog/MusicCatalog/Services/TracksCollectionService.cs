@@ -12,11 +12,19 @@ namespace MusicCatalog.Services
         }
         public override void GetAll()
         {
-            Console.WriteLine("ID       Название        Треков всего");
-            _unitOfWork.TracksCollections.GetAll().ForEach(c =>
+            var entities = _unitOfWork.TracksCollections.GetAll();
+            if (entities.Count > 0)
             {
-                Console.WriteLine($"{c.Id}      {c.Name}        {c.Tracks.Count}");
-            });
+                Console.WriteLine("ID       Название        Треков всего");
+                entities.ForEach(c =>
+                {
+                     Console.WriteLine($"{c.Id}      {c.Name}        {c.Tracks.Count}");
+                });
+            }
+            else
+            {
+                Console.WriteLine("Нет добавленных сборников");
+            }
         }
 
         public override void AddOne()
@@ -48,6 +56,7 @@ namespace MusicCatalog.Services
 
         public void AddMoreTracks()
         {
+            if (CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID сборника для получения информации или -1 для выхода");
             int id;
             TracksCollection collection;
@@ -127,11 +136,7 @@ namespace MusicCatalog.Services
 
         public override void DeleteOne()
         {
-            if (_unitOfWork.TracksCollections.GetAll().Count == 0)
-            {
-                Console.WriteLine("Нет сборников, чтобы что-то удалять");
-                return;
-            }
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID сборника для удаления");
             int id;
             if (int.TryParse(Console.ReadLine(), out id))
@@ -156,6 +161,7 @@ namespace MusicCatalog.Services
 
         public override void GetOne()
         {
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID сборника для получения информации или -1 для выхода");
             int id;
             TracksCollection collection;
@@ -196,14 +202,19 @@ namespace MusicCatalog.Services
             });
         }
 
-        public void Search()
-        {
+        public override bool CheckIfDataPresent() {
             var collections = _unitOfWork.TracksCollections.GetAll();
             if (collections.Count == 0)
             {
-                Console.WriteLine("Нет сборников для поиска");
-                return;
+                Console.WriteLine("Нет добавленных сборников");
+                return false;
             }
+            return true;
+        }
+        public void Search()
+        {
+            if (!CheckIfDataPresent()) return;
+            var collections = _unitOfWork.TracksCollections.GetAll();
             Console.Write("Введите запрос или -1 для выхода: ");
             string query = Console.ReadLine();
             if (query == "-1")

@@ -9,6 +9,8 @@ namespace MusicCatalog.Services
         public abstract void DeleteOne();
         public abstract void AddOne();
 
+        public abstract bool CheckIfDataPresent();
+
         public bool getConfirmation()
         {
             while (true)

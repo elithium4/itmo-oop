@@ -40,21 +40,17 @@ namespace MusicCatalog.Services
         public override void GetAll()
         {
             var genres = _unitOfWork.Genres.GetAll();
-            if (genres.Count > 0)
+            if (CheckIfDataPresent())
             {
                 Console.WriteLine("ID        Name");
                 genres.ForEach(g => Console.WriteLine($"{g.Id}         {g.Name}"));
-            } else
-            {
-                Console.WriteLine("Нет сохраненных жанров");
             }
         
         }
         public override void DeleteOne()
         {
-            if (_unitOfWork.Genres.GetAll().Count == 0)
+            if (!CheckIfDataPresent())
             {
-                Console.WriteLine("Нет жанров, чтобы что-то удалять");
                 return;
             }
             Console.WriteLine("Введите ID жанра для удаления");
@@ -77,6 +73,15 @@ namespace MusicCatalog.Services
             {
                 Console.WriteLine("Удаление отменено");
             }
+        }
+
+        public override bool CheckIfDataPresent() {
+            if (_unitOfWork.Genres.GetAll().Count == 0)
+            {
+                Console.WriteLine("Нет добавленных жанров");
+                return false;
+            }
+            return true;
         }
     }
 }

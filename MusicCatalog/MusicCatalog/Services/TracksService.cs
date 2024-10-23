@@ -123,7 +123,9 @@ namespace MusicCatalog.Services
                         }
                         else
                         {
+                            if (albumId == -1) break;
                             album = suitableAlbums.Find(a => a.Id == albumId);
+                            break;
                         }
                     }
                 }
@@ -135,7 +137,6 @@ namespace MusicCatalog.Services
 
              _unitOfWork.Tracks.Add(new Track { Name = name, Genre = genre, Duration = duration, Album = album, Musicians = musicians });
             _unitOfWork.Save();
-            
         }
 
         public override void GetAll()
@@ -148,17 +149,13 @@ namespace MusicCatalog.Services
             }
             else
             {
-                Console.WriteLine("Нет сохраненных жанров");
+                Console.WriteLine("Нет добавленных треков");
             }
 
         }
         public override void DeleteOne()
         {
-            if (_unitOfWork.Tracks.GetAll().Count == 0)
-            {
-                Console.WriteLine("Нет треков, чтобы что-то удалять");
-                return;
-            }
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Введите ID трека для удаления");
             int id;
             if (int.TryParse(Console.ReadLine(), out id))
@@ -181,8 +178,17 @@ namespace MusicCatalog.Services
             }
         }
 
+        public override bool CheckIfDataPresent() {
+            if (_unitOfWork.Tracks.GetAll().Count == 0)
+            {
+                Console.WriteLine("Нет добавленных треков");
+                return false;
+            }
+            return true;
+        }
         public void Search()
         {
+            if (!CheckIfDataPresent()) return;
             Console.WriteLine("Выберите критерий поиска:");
             Console.WriteLine("1 - по названию");
             Console.WriteLine("2 - по исполнителю");

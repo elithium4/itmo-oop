@@ -26,7 +26,8 @@ namespace MusicCatalog.Services
         }
         public void DisplayActionList()
         {
-            while (true)
+            bool inMenu = true;
+            while (inMenu)
             {
                 Console.WriteLine("Выберите раздел для взаимодействия:");
                 Console.WriteLine("1 - Альбомы");
@@ -34,8 +35,9 @@ namespace MusicCatalog.Services
                 Console.WriteLine("3 - Исполнители");
                 Console.WriteLine("4 - Сборники треков");
                 Console.WriteLine("5 - Жанры");
+                Console.WriteLine("6 - Выход");
                 int action;
-                if (int.TryParse(Console.ReadLine(), out action) && action >= 1 && action <= 5)
+                if (int.TryParse(Console.ReadLine(), out action) && (action >= 1 && action <= 6))
                 {
                     switch (action)
                     {
@@ -53,6 +55,9 @@ namespace MusicCatalog.Services
                             break;
                         case 5:
                             HandleGenres();
+                            break;
+                        case 6:
+                            inMenu = false;
                             break;
                         default:
                             Console.WriteLine("Error");
