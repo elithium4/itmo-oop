@@ -1,5 +1,5 @@
-﻿using Lab3.Model;
-using Lab3.Reposiories;
+﻿using Lab3.Repositories;
+using Lab3.Repositories.Model;
 
 namespace Lab3.Services
 {

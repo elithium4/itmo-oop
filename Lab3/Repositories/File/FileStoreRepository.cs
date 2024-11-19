@@ -1,9 +1,10 @@
-﻿using Lab3.Model;
-using Lab3.Reposiories;
+﻿using Lab3.Repositories;
+using Lab3.Repositories.Model;
+using System.IO;
 
-namespace Lab3.Repositories
+namespace Lab3.Repositories.File
 {
-    public class FileStoreRepository: IStoreRepository
+    public class FileStoreRepository : IStoreRepository
     {
         private readonly string _filePath;
 
@@ -14,14 +15,14 @@ namespace Lab3.Repositories
 
         public async Task CreateStoreAsync(Store store)
         {
-            var lines = await File.ReadAllLinesAsync(_filePath);
+            var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             var newLine = $"{store.Id},{store.Name},{store.Address}";
-            await File.AppendAllLinesAsync(_filePath, [newLine]);
+            await System.IO.File.AppendAllLinesAsync(_filePath, [newLine]);
         }
 
         public async Task<List<Store>> GetAllStoresAsync()
         {
-            var lines = await File.ReadAllLinesAsync(_filePath);
+            var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             return lines.Select(line =>
             {
                 var parts = line.Split(',');
@@ -36,7 +37,7 @@ namespace Lab3.Repositories
 
         public async Task<Store> GetStoreByIdAsync(int id)
         {
-            var lines = await File.ReadAllLinesAsync(_filePath);
+            var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             var line = lines.FirstOrDefault(l => l.StartsWith($"{id},"));
             if (line == null) return null;
 

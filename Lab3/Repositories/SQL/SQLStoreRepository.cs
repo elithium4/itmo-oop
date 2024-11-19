@@ -1,14 +1,15 @@
-﻿using Lab3.Model;
+﻿using Lab3.Repositories.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace Lab3.Reposiories
+namespace Lab3.Repositories.SQL
 {
     public class SQLStoreRepository : IStoreRepository
     {
         private readonly ApplicationContext _context;
 
 
-        public SQLStoreRepository(ApplicationContext context) {
+        public SQLStoreRepository(ApplicationContext context)
+        {
             _context = context;
         }
         public async Task CreateStoreAsync(Store store)
@@ -26,5 +27,6 @@ namespace Lab3.Reposiories
         {
             return await _context.Stores.ToListAsync();
         }
+
     }
 }

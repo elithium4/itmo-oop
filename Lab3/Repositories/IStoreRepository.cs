@@ -1,6 +1,6 @@
-﻿using Lab3.Model;
+﻿using Lab3.Repositories.Model;
 
-namespace Lab3.Reposiories
+namespace Lab3.Repositories
 {
     public interface IStoreRepository
     {
