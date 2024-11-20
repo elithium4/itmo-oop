@@ -9,10 +9,12 @@ namespace Lab3.Controllers
     public class StoreController: ControllerBase
     {
         private readonly StoreService _storeService;
+        private readonly StoreProductService _storeProductService;
 
-        public StoreController(StoreService storeService)
+        public StoreController(StoreService storeService, StoreProductService storeProductService)
         {
             _storeService = storeService;
+            _storeProductService = storeProductService;
         }
 
         [HttpGet("all")]
@@ -26,6 +28,13 @@ namespace Lab3.Controllers
         public async Task<ActionResult> CreateStore(Store store)
         {
             await _storeService.CreateStore(store);
+            return Ok();
+        }
+
+        [HttpPut("addProducts")]
+        public async Task<ActionResult> AddProductToStore(ProductStoreDetail product)
+        {
+            await _storeProductService.AddProductToStore(product);
             return Ok();
         }
 

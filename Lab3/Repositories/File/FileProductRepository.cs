@@ -1,5 +1,6 @@
 ﻿using Lab3.Repositories;
 using Lab3.Repositories.Model;
+using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -101,6 +102,41 @@ namespace Lab3.Repositories.File
             }
 
             return matchingProducts;
+        }
+
+        public async Task UpdateProductInStore(ProductStoreDetail entity)
+        {
+            var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
+            var products = lines.ToList();
+            bool productFound = false;
+
+            for (int i = 0; i < products.Count; i++)
+            {
+                var fields = lines[i].Split(',');
+
+                if (fields[0] == entity.ProductName)
+                {
+                    productFound = true;
+
+                    for (int storeIdx = 1; storeIdx < fields.Length; storeIdx += 3)
+                    {
+                        if (int.Parse(fields[storeIdx]) == entity.StoreId)
+                        {
+                            fields[storeIdx + 1] = entity.Amount.ToString();
+                            fields[storeIdx + 1] = entity.Price.ToString();
+                            products[i] = string.Join(",", fields);
+                            System.IO.File.WriteAllLines(_filePath, lines);
+                            return;
+                        }
+                    }
+                    fields.Append(entity.StoreId.ToString());
+                    fields.Append(entity.Amount.ToString());
+                    fields.Append(entity.Price.ToString());
+                    return;
+                }
+            }
+
+            throw new Exception($"Product with name {entity.ProductName} doesn't exist");
         }
     }
 }

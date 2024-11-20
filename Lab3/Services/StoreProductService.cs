@@ -1,5 +1,6 @@
 ﻿using Lab3.Repositories;
 using Lab3.Repositories.Model;
+using System.Xml.Linq;
 
 namespace Lab3.Services
 {
@@ -71,6 +72,45 @@ namespace Lab3.Services
         //        // Убираем товар, чтобы исследовать другие комбинации
         //        currentCombination.RemoveAt(currentCombination.Count - 1);
         //    }
+        //}
+
+        public async Task<double> BuyProductsFromStore(int storeId, List<ProductPurchase> products)
+        {
+            var productsInStore = await _productRepository.GetProductsByStoreIdAsync(storeId);
+            double total = 0;
+            foreach (var item in products)
+            {
+                var storeProductInfo = productsInStore.Find(p => p.ProductName == item.ProductName);
+                if (storeProductInfo == null || storeProductInfo.Amount < item.Amount)
+                {
+                    throw new Exception("Can't purchase: no required product");
+                }
+                total += item.Amount * storeProductInfo.Price;
+                await _productRepository.UpdateProductInStore(new ProductStoreDetail
+                {
+                    ProductName = item.ProductName,
+                    StoreId = storeId,
+                    Amount = storeProductInfo.Amount - item.Amount,
+                    Price = storeProductInfo.Price
+                });
+
+            }
+            return total;
+        }
+
+        public async Task AddProductToStore(ProductStoreDetail productDetail)
+        {
+            await _productRepository.UpdateProductInStore(productDetail);
+        }
+
+        public async Task UpdateProductStorePrice(int storeId, string productName, double price)
+        {
+
+        }
+
+        //public async Task<List<Store>> FindBestDealForProductSet(List<ProductPurchase> products)
+        //{
+
         //}
     }
 }

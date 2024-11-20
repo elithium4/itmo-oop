@@ -24,10 +24,12 @@ else
 // Add services to the container.
 var storeService = new StoreService(storeRepository);
 var productService = new ProductService(productRepository);
+var storeProductService = new StoreProductService(storeRepository, productRepository);
 
 builder.Services.AddControllers();
 builder.Services.AddSingleton(storeService);
 builder.Services.AddSingleton(productService);
+builder.Services.AddSingleton(storeProductService);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
