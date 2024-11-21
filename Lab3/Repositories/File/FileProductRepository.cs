@@ -104,7 +104,7 @@ namespace Lab3.Repositories.File
             return matchingProducts;
         }
 
-        public async Task UpdateProductInStore(ProductStoreDetail entity)
+        public async Task AddOrUpdateProductInStore(ProductStoreDetail entity)
         {
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             var products = lines.ToList();

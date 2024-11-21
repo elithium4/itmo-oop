@@ -15,7 +15,6 @@ namespace Lab3.Repositories
         Task<List<ProductStoreDetail>> GetProductInAllStores(string name);
 
         Task<List<ProductStoreDetail>> GetProductsByStoreIdAsync(int id);
-
-        Task UpdateProductInStore(ProductStoreDetail entity);
+        Task AddOrUpdateProductInStore(ProductStoreDetail entity);
     }
 }

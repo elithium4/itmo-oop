@@ -86,7 +86,7 @@ namespace Lab3.Services
                     throw new Exception("Can't purchase: no required product");
                 }
                 total += item.Amount * storeProductInfo.Price;
-                await _productRepository.UpdateProductInStore(new ProductStoreDetail
+                await _productRepository.AddOrUpdateProductInStore(new ProductStoreDetail
                 {
                     ProductName = item.ProductName,
                     StoreId = storeId,
@@ -100,7 +100,7 @@ namespace Lab3.Services
 
         public async Task AddProductToStore(ProductStoreDetail productDetail)
         {
-            await _productRepository.UpdateProductInStore(productDetail);
+            await _productRepository.AddOrUpdateProductInStore(productDetail);
         }
 
         public async Task UpdateProductStorePrice(int storeId, string productName, double price)

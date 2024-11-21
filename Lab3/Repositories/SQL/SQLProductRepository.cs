@@ -44,9 +44,14 @@ namespace Lab3.Repositories.SQL
             return await _context.ProductStoreDetails.Where(p => p.StoreId == id).ToListAsync();
         }
 
-        public async Task UpdateProductInStore(ProductStoreDetail entity)
+        public async Task AddOrUpdateProductInStore(ProductStoreDetail entity)
         {
+            var existingDetail = _context.ProductStoreDetails.Find(entity.StoreId, entity.ProductName);
+            if (existingDetail == null) {
+             _context.ProductStoreDetails.Add(entity);
+            } else {
              _context.ProductStoreDetails.Update(entity);
+            }
             await _context.SaveChangesAsync();
         }
     }
