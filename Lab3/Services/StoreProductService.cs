@@ -3,6 +3,7 @@ using Lab3.Repositories.Model;
 using Lab3.Services.Exceptions;
 using Lab3.Services.DTO;
 using System.Xml.Linq;
+using AutoMapper;
 
 namespace Lab3.Services
 {
@@ -10,14 +11,16 @@ namespace Lab3.Services
     {
         private readonly IStoreRepository _storeRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IMapper _mapper;
 
-        public StoreProductService(IStoreRepository storeRepository, IProductRepository productRepository)
+        public StoreProductService(IStoreRepository storeRepository, IProductRepository productRepository, IMapper mapper)
         {
             _storeRepository = storeRepository;
             _productRepository = productRepository;
+            _mapper = mapper;
         }
 
-        public async Task<List<Store>> FindCheapestStoreByProductName(string name)
+        public async Task<List<StoreDTO>> FindCheapestStoreByProductName(string name)
         {
             var productInStores = await _productRepository.GetProductInAllStores(name);
             if (productInStores == null)
@@ -46,40 +49,14 @@ namespace Lab3.Services
                     suitableStores = [ await _storeRepository.GetStoreByIdAsync(productInStore.StoreId) ];
                 }
             }
-            return suitableStores;
+            return _mapper.Map<List<StoreDTO>>(suitableStores);
 
         }
 
-        //public async Task<List<List<Product>>> getShoppingListByMoneyAmount(int storeId, int moneyAmount)
-        //{
-        //    var availableProduct = _productRepository.GetProductsByStoreIdAsync(storeId);
-
-        //}
-
-        //private void FindProductsSet(List<ProductStoreDetail> products, int remainingBudget, List<ProductStoreDetail> currentCombination, List<List<Product>> combinations)
-        //{
-        //    if (remainingBudget < 0) return; // Выходим, если превышен бюджет
-        //    if (remainingBudget == 0) // Если остался ровно 0, добавляем комбинацию в результаты
-        //    {
-        //        combinations.Add(new List<ProductStoreDetail>(currentCombination));
-        //        return;
-        //    }
-
-        //    for (int i = 0; i < products.Count; i++)
-        //    {
-        //        // Добавляем текущий товар в текущую комбинацию
-        //        currentCombination.Add(products[i]);
-        //        // Рекурсивно ищем комбинации для оставшегося бюджета
-        //        FindProductsSet(products, remainingBudget - products[i].Price, currentCombination, combinations);
-        //        // Убираем товар, чтобы исследовать другие комбинации
-        //        currentCombination.RemoveAt(currentCombination.Count - 1);
-        //    }
-        //}
-
-        public async Task<double> BuyProductsFromStore(int storeId, List<ProductPurchaseDTO> products)
+        public async Task<int> BuyProductsFromStore(int storeId, List<ProductPurchaseDTO> products)
         {
             var productsInStore = await _productRepository.GetProductsByStoreIdAsync(storeId);
-            double total = 0;
+            int total = 0;
             foreach (var item in products)
             {
                 var storeProductInfo = productsInStore.Find(p => p.ProductName == item.ProductName);
@@ -113,7 +90,7 @@ namespace Lab3.Services
             return total;
         }
 
-        public async Task AddProductToStore(ProductStoreDetail productDetail)
+        public async Task AddProductToStore(StoreProductDTO productDetail)
         {
             var detail = await _productRepository.GetProductInStoreAsync(productDetail.StoreId, productDetail.ProductName);
             if (detail != null)
@@ -128,7 +105,7 @@ namespace Lab3.Services
             {
                 throw new NonPositivePriceException();
             }
-            await _productRepository.AddOrUpdateProductInStore(productDetail);
+            await _productRepository.AddOrUpdateProductInStore(_mapper.Map<StoreProduct>(productDetail));
         }
 
         public async Task UpdateProductStorePrice(int storeId, string productName, int price)
@@ -175,7 +152,7 @@ namespace Lab3.Services
             return combos;
         }
 
-        private void FindProductCombo(List<ProductStoreDetail> productsInStore, int remainingMoney, List<ProductPurchaseDTO> currentCombo,  List<List<ProductPurchaseDTO>> combos, int searchStart = 0)
+        private void FindProductCombo(List<StoreProduct> productsInStore, int remainingMoney, List<ProductPurchaseDTO> currentCombo,  List<List<ProductPurchaseDTO>> combos, int searchStart = 0)
         {
 
             if (remainingMoney <=0)

@@ -17,7 +17,7 @@ namespace Lab3.Controllers
         }
 
         [HttpPut("store")]
-        public async Task<ActionResult<double>> PurchaseFromStore(int storeId, List<ProductPurchaseDTO> purchase)
+        public async Task<ActionResult<int>> PurchaseFromStore(int storeId, List<ProductPurchaseDTO> purchase)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace Lab3.Controllers
         }
 
         [HttpGet("cheapestStore")]
-        public async Task<ActionResult<Store>> GetCheapestStoreForProduct(string productName)
+        public async Task<ActionResult<StoreDTO>> GetCheapestStoreForProduct(string productName)
         {
             try
             {

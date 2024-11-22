@@ -1,5 +1,5 @@
-﻿using Lab3.Repositories.Model;
-using Lab3.Services;
+﻿using Lab3.Services;
+using Lab3.Services.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab3.Controllers
@@ -18,21 +18,35 @@ namespace Lab3.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<ActionResult<List<Store>>> GetAllStores()
+        public async Task<ActionResult<List<StoreDTO>>> GetAllStores()
         {
             var stores = await _storeService.GetAllStores();
             return Ok(stores);
         }
 
+        [HttpGet("one")]
+        public async Task<ActionResult<FullStoreInfoDTO>> GetStoresById(int storeId)
+        {
+            try
+            {
+                var stores = await _storeService.GetStoreById(storeId);
+                return Ok(stores);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("create")]
-        public async Task<ActionResult> CreateStore(Store store)
+        public async Task<ActionResult> CreateStore(StoreDTO store)
         {
             await _storeService.CreateStore(store);
             return Ok();
         }
 
         [HttpPut("addProducts")]
-        public async Task<ActionResult> AddProductToStore(ProductStoreDetail product)
+        public async Task<ActionResult> AddProductToStore(StoreProductDTO product)
         {
             try
             {
@@ -72,14 +86,6 @@ namespace Lab3.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        //[HttpPut("productAmount")]
-        //public async Task<ActionResult> SetProductAmount(Product product, int amount)
-        //{
-
-        //}
-
-
 
     }
 }

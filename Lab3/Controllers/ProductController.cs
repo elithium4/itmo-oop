@@ -1,5 +1,6 @@
 ﻿using Lab3.Repositories.Model;
 using Lab3.Services;
+using Lab3.Services.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab3.Controllers
@@ -16,7 +17,7 @@ namespace Lab3.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<ActionResult<List<Store>>> GetAllProducts()
+        public async Task<ActionResult<List<ProductDTO>>> GetAllProducts()
         {
             var stores = await _productService.GetAllProducts();
             return Ok(stores);
@@ -35,14 +36,6 @@ namespace Lab3.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-        //[HttpPut("productAmount")]
-        //public async Task<ActionResult> SetProductAmount(Product product, int amount)
-        //{
-
-        //}
-
-
 
     }
 }

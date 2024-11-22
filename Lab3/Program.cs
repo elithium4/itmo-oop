@@ -10,26 +10,22 @@ IStoreRepository storeRepository;
 IProductRepository productRepository;
 if (repositoryType == "Sql")
 {
-    var dbContext = new ApplicationContext();
-    storeRepository = new SQLStoreRepository(dbContext);
-    productRepository = new SQLProductRepository(dbContext);
-
+    builder.Services.AddDbContext<ApplicationContext>();
+    builder.Services.AddScoped<IProductRepository, SQLProductRepository>();
+    builder.Services.AddScoped<IStoreRepository, SQLStoreRepository>();
 }
 else
 {
-    storeRepository = new FileStoreRepository(builder.Configuration["FilePath:Store"]);
-    productRepository = new FileProductRepository(builder.Configuration["FilePath:Product"]);
+    builder.Services.AddScoped<IProductRepository>(provider => new FileProductRepository(builder.Configuration["FilePath:Product"]));
+    builder.Services.AddScoped<IStoreRepository>(provider => new FileStoreRepository(builder.Configuration["FilePath:Store"]));
 }
 
-// Add services to the container.
-var storeService = new StoreService(storeRepository);
-var productService = new ProductService(productRepository);
-var storeProductService = new StoreProductService(storeRepository, productRepository);
-
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddControllers();
-builder.Services.AddSingleton(storeService);
-builder.Services.AddSingleton(productService);
-builder.Services.AddSingleton(storeProductService);
+
+builder.Services.AddScoped<StoreService>();
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<StoreProductService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -6,6 +6,6 @@ namespace Lab3.Repositories.Model
     {
         [Key]
         public string Name { get; set; }
-        public List<ProductStoreDetail> StoreDetails { get; set; }
+        public List<StoreProduct> StoreProducts { get; set; }
     }
 }

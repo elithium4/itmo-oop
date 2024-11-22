@@ -1,18 +1,22 @@
 ﻿using Lab3.Repositories;
 using Lab3.Repositories.Model;
 using Lab3.Services.Exceptions;
+using Lab3.Services.DTO;
+using AutoMapper;
 
 namespace Lab3.Services
 {
     public class ProductService
     {
         private readonly IProductRepository _repository;
+        private readonly IMapper _mapper;
 
-        public ProductService(IProductRepository repository) { _repository = repository; }
+        public ProductService(IProductRepository repository, IMapper mapper) { _repository = repository; _mapper = mapper; }
 
-        public async Task<List<Product>> GetAllProducts()
+        public async Task<List<ProductDTO>> GetAllProducts()
         {
-            return await _repository.GetAllProductsAsync();
+            var products = await _repository.GetAllProductsAsync();
+            return _mapper.Map<List<ProductDTO>>(products);
         }
 
         public async Task CreateProduct(string name)

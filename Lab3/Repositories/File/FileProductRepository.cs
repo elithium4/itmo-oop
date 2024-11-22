@@ -50,7 +50,7 @@ namespace Lab3.Repositories.File
             };
         }
 
-        public async Task<List<ProductStoreDetail>> GetProductInAllStores(string name)
+        public async Task<List<StoreProduct>> GetProductInAllStores(string name)
         {
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             string pattern = $@"^{Regex.Escape(name)},";
@@ -59,10 +59,10 @@ namespace Lab3.Repositories.File
             if (line == null) return null;
 
             var parts = line.Split(',');
-            List<ProductStoreDetail> productInStores = new List<ProductStoreDetail>();
+            List<StoreProduct> productInStores = new List<StoreProduct>();
             for (int i = 1; i < parts.Length; i += 3)
             {
-                productInStores.Add(new ProductStoreDetail
+                productInStores.Add(new StoreProduct
                 {
                     ProductName = name,
                     StoreId = int.Parse(parts[i]),
@@ -73,9 +73,9 @@ namespace Lab3.Repositories.File
             return productInStores;
         }
 
-        public async Task<List<ProductStoreDetail>> GetProductsByStoreIdAsync(int id)
+        public async Task<List<StoreProduct>> GetProductsByStoreIdAsync(int id)
         {
-            var matchingProducts = new List<ProductStoreDetail>();
+            var matchingProducts = new List<StoreProduct>();
 
             using (StreamReader reader = new StreamReader(_filePath))
             {
@@ -89,7 +89,7 @@ namespace Lab3.Repositories.File
                         if (parts[i] == id.ToString())
                         {
                             matchingProducts.Add(
-                                new ProductStoreDetail{
+                                new StoreProduct{
                                     ProductName = parts[0],
                                     StoreId = id,
                                     Amount = int.Parse(parts[i+1]),
@@ -104,7 +104,7 @@ namespace Lab3.Repositories.File
             return matchingProducts;
         }
 
-        public async Task AddOrUpdateProductInStore(ProductStoreDetail entity)
+        public async Task AddOrUpdateProductInStore(StoreProduct entity)
         {
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             var products = lines.ToList();
@@ -140,7 +140,7 @@ namespace Lab3.Repositories.File
             throw new Exception($"Product with name {entity.ProductName} doesn't exist");
         }
 
-        public async Task<ProductStoreDetail> GetProductInStoreAsync(int storeId, string productName)
+        public async Task<StoreProduct> GetProductInStoreAsync(int storeId, string productName)
         {
             var productInfo = await GetProductInAllStores(productName);
             if (productInfo != null)
@@ -150,7 +150,7 @@ namespace Lab3.Repositories.File
             return null;
         }
 
-        public async Task RemoveProductFromStoreAsync(ProductStoreDetail entity)
+        public async Task RemoveProductFromStoreAsync(StoreProduct entity)
         {
             var lines = (await System.IO.File.ReadAllLinesAsync(_filePath)).ToList();
             string pattern = $@"^{Regex.Escape(entity.ProductName)},";

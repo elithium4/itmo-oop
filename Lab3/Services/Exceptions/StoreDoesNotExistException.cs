@@ -2,6 +2,6 @@
 {
     public class StoreDoesNotExistException: Exception
     {
-        public StoreDoesNotExistException(string message) : base(message) { }
+        public StoreDoesNotExistException(int storeId) : base($"Store with id {storeId} does not exist") { }
     }
 }
