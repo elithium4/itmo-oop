@@ -1,5 +1,6 @@
 ﻿using Lab3.Repositories.Model;
 using Lab3.Services;
+using Lab3.Services.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lab3.Controllers
@@ -16,18 +17,45 @@ namespace Lab3.Controllers
         }
 
         [HttpPut("store")]
-        public async Task<ActionResult<double>> PurchaseFromStore(int storeId, List<ProductPurchase> purchase)
+        public async Task<ActionResult<double>> PurchaseFromStore(int storeId, List<ProductPurchaseDTO> purchase)
         {
-            var total = await _storeProductService.BuyProductsFromStore(storeId, purchase);
-            return Ok(total);
+            try
+            {
+                var total = await _storeProductService.BuyProductsFromStore(storeId, purchase);
+                return Ok(total);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("cheapestStore")]
         public async Task<ActionResult<Store>> GetCheapestStoreForProduct(string productName)
         {
-            var store = await _storeProductService.FindCheapestStoreByProductName(productName);
-            return Ok(store);
+            try
+            {
+                var store = await _storeProductService.FindCheapestStoreByProductName(productName);
+                return Ok(store);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<List<List<ProductPurchaseDTO>>>> GetAllPossiblePurchases(int storeId, int money)
+        {
+            try
+            {
+                var res = await _storeProductService.FindAllProductsForMoneyAmount(storeId, money);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

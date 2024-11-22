@@ -93,7 +93,7 @@ namespace Lab3.Repositories.File
                                     ProductName = parts[0],
                                     StoreId = id,
                                     Amount = int.Parse(parts[i+1]),
-                                    Price = double.Parse(parts[i+2]),
+                                    Price = int.Parse(parts[i+2]),
                                 });
                             break;
                         }
@@ -132,11 +132,45 @@ namespace Lab3.Repositories.File
                     fields.Append(entity.StoreId.ToString());
                     fields.Append(entity.Amount.ToString());
                     fields.Append(entity.Price.ToString());
+                    System.IO.File.WriteAllLines(_filePath, lines);
                     return;
                 }
             }
 
             throw new Exception($"Product with name {entity.ProductName} doesn't exist");
+        }
+
+        public async Task<ProductStoreDetail> GetProductInStoreAsync(int storeId, string productName)
+        {
+            var productInfo = await GetProductInAllStores(productName);
+            if (productInfo != null)
+            {
+                return productInfo.Find(s => s.StoreId == storeId);
+            }
+            return null;
+        }
+
+        public async Task RemoveProductFromStoreAsync(ProductStoreDetail entity)
+        {
+            var lines = (await System.IO.File.ReadAllLinesAsync(_filePath)).ToList();
+            string pattern = $@"^{Regex.Escape(entity.ProductName)},";
+            Regex regex = new Regex(pattern);
+            var idx = lines.FindIndex(l => regex.IsMatch(l));
+            if (idx == -1) return;
+
+            var parts = lines[idx].Split(',');
+            var newStores = new List<string>([parts[0]]);
+            for (int i = 1; i < parts.Length; i += 3)
+            {
+                if (int.Parse(parts[i]) != entity.StoreId)
+                {
+                    newStores.Add(parts[i]);
+                    newStores.Add(parts[i+1]);
+                    newStores.Add(parts[i+2]);
+                }
+            }
+            lines[idx] = string.Join(",", newStores);
+            System.IO.File.WriteAllLines(_filePath, lines);
         }
     }
 }

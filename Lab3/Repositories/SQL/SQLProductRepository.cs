@@ -54,5 +54,16 @@ namespace Lab3.Repositories.SQL
             }
             await _context.SaveChangesAsync();
         }
+
+        public async Task<ProductStoreDetail> GetProductInStoreAsync(int storeId, string productName)
+        {
+            return await _context.ProductStoreDetails.FindAsync(storeId, productName);
+        }
+
+        public async Task RemoveProductFromStoreAsync(ProductStoreDetail entity)
+        {
+             _context.ProductStoreDetails.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
     }
 }

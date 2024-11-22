@@ -34,8 +34,43 @@ namespace Lab3.Controllers
         [HttpPut("addProducts")]
         public async Task<ActionResult> AddProductToStore(ProductStoreDetail product)
         {
-            await _storeProductService.AddProductToStore(product);
-            return Ok();
+            try
+            {
+                await _storeProductService.AddProductToStore(product);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("price")]
+        public async Task<ActionResult> SetProductPricetInStore(int storeId, string productName, int price)
+        {
+            try
+            {
+                await _storeProductService.UpdateProductStorePrice(storeId, productName, price);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("amount")]
+        public async Task<ActionResult> SetProductAmounttInStore(int storeId, string productName, int amount)
+        {
+            try
+            {
+                await _storeProductService.UpdateProductStoreAmount(storeId, productName, amount);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //[HttpPut("productAmount")]

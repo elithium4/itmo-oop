@@ -23,10 +23,17 @@ namespace Lab3.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult> CreateStore(string name)
+        public async Task<ActionResult> CreateProduct(string name)
         {
-            var result = await _productService.CreateProduct(name);
-            return result ? Ok() : Conflict("Product with this name already exists");
+            try
+            {
+                await _productService.CreateProduct(name);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //[HttpPut("productAmount")]
