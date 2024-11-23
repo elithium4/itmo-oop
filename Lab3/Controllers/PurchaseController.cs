@@ -1,5 +1,4 @@
-﻿using Lab3.Repositories.Model;
-using Lab3.Services;
+﻿using Lab3.Services;
 using Lab3.Services.DTO;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +15,11 @@ namespace Lab3.Controllers
             _storeProductService = storeProductService;
         }
 
+        /// <summary>
+        /// Купить товар в магазине
+        /// </summary>
+        /// <param name="storeId">Id магазина</param>
+        /// /// <param name="purchase">Данные о покупке товара</param>
         [HttpPut("store")]
         public async Task<ActionResult<int>> PurchaseFromStore(int storeId, List<ProductPurchaseDTO> purchase)
         {
@@ -30,8 +34,12 @@ namespace Lab3.Controllers
             }
         }
 
+        /// <summary>
+        /// Найти магазин, в котором товар наиболее дешевый
+        /// </summary>
+        /// /// <param name="productName">Название товара</param>
         [HttpGet("cheapestStore")]
-        public async Task<ActionResult<StoreDTO>> GetCheapestStoreForProduct(string productName)
+        public async Task<ActionResult<StorePurchaseDTO>> GetCheapestStoreForProduct(string productName)
         {
             try
             {
@@ -44,7 +52,30 @@ namespace Lab3.Controllers
             }
         }
 
-        [HttpGet("all")]
+        /// <summary>
+        /// Найти магазин, в котором покупка списка товаров стоит меньше всего
+        /// </summary>
+        /// <param name="list">Список товаров для покупки</param>
+        [HttpPost("cheapestListStore")]
+        public async Task<ActionResult<List<StorePurchaseDTO>>> GetCheapestListStore(List<ProductPurchaseDTO> list)
+        {
+            try
+            {
+                var res = await _storeProductService.FindCheapestStoreForList(list);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Найти все возможные покупки в магазине на заданную сумму (часть суммы может остаться)
+        /// </summary>
+        /// <param name="storeId">Id магазина</param>
+        /// /// <param name="money">Сумма денег</param>
+        [HttpGet("allPurchases")]
         public async Task<ActionResult<List<List<ProductPurchaseDTO>>>> GetAllPossiblePurchases(int storeId, int money)
         {
             try

@@ -4,19 +4,15 @@ using System.IO;
 
 namespace Lab3.Repositories.File
 {
-    public class FileStoreRepository : IStoreRepository
+    public class FileStoreRepository : BaseFileRepository, IStoreRepository
     {
-        private readonly string _filePath;
-
-        public FileStoreRepository(string filePath)
-        {
-            _filePath = filePath;
-        }
+        private Random _idGenerator = new Random();
+        public FileStoreRepository(string filePath) : base(filePath) { }
 
         public async Task CreateStoreAsync(Store store)
         {
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
-            var newLine = $"{store.Id},{store.Name},{store.Address}";
+            var newLine = $"{_idGenerator.Next(1, 100000000)},{store.Name},{store.Address}";
             await System.IO.File.AppendAllLinesAsync(_filePath, [newLine]);
         }
 

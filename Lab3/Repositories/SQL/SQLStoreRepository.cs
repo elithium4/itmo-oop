@@ -20,7 +20,7 @@ namespace Lab3.Repositories.SQL
 
         public async Task<Store> GetStoreByIdAsync(int id)
         {
-            return await _context.Stores.FindAsync(id);
+            return await _context.Stores.FirstAsync(s => s.Id == id);
         }
 
         public async Task<List<Store>> GetAllStoresAsync()

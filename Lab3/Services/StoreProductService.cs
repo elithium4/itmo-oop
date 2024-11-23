@@ -20,36 +20,41 @@ namespace Lab3.Services
             _mapper = mapper;
         }
 
-        public async Task<List<StoreDTO>> FindCheapestStoreByProductName(string name)
+        public async Task<List<StorePurchaseDTO>> FindCheapestStoreByProductName(string name)
         {
             var productInStores = await _productRepository.GetProductInAllStores(name);
             if (productInStores == null)
             {
                 throw new ProductDoesNotExistsException(name);
             }
-            double? minimumPrice = null;
+            int minimumPrice = int.MaxValue;
             List<Store> suitableStores = new List<Store>();
             foreach (var productInStore in productInStores)
             {
-                if (minimumPrice == null)
-                {
-                    minimumPrice = productInStore.Price;
-                    suitableStores.Add(await _storeRepository.GetStoreByIdAsync(productInStore.StoreId));
-                    continue;
-                } 
-
-                if (productInStore.Price == minimumPrice)
-                {
-                    suitableStores.Add(await _storeRepository.GetStoreByIdAsync(productInStore.StoreId));
-                }
 
                 if (productInStore.Price < minimumPrice)
                 {
                     minimumPrice = productInStore.Price;
-                    suitableStores = [ await _storeRepository.GetStoreByIdAsync(productInStore.StoreId) ];
+                    suitableStores = [await _storeRepository.GetStoreByIdAsync(productInStore.StoreId)];
+                } else if (productInStore.Price == minimumPrice)
+                {
+                    suitableStores.Add(await _storeRepository.GetStoreByIdAsync(productInStore.StoreId));
                 }
             }
-            return _mapper.Map<List<StoreDTO>>(suitableStores);
+            if (suitableStores.Count == 0)
+            {
+                throw new NoSuitableStoresException();
+            }
+            List<StorePurchaseDTO> storesForPurchase = new List<StorePurchaseDTO>();
+            foreach (var item in suitableStores)
+            {
+                storesForPurchase.Add(new StorePurchaseDTO
+                {
+                    Store = _mapper.Map<StoreDTO>(item),
+                    Cost = minimumPrice
+                });
+            }
+            return storesForPurchase;
 
         }
 
@@ -105,7 +110,25 @@ namespace Lab3.Services
             {
                 throw new NonPositivePriceException();
             }
-            await _productRepository.AddOrUpdateProductInStore(_mapper.Map<StoreProduct>(productDetail));
+            var store = await _storeRepository.GetStoreByIdAsync(productDetail.StoreId);
+            if (store == null)
+            {
+                throw new StoreDoesNotExistException(productDetail.StoreId);
+            }
+            var product = await _productRepository.GetProductByNameAsync(productDetail.ProductName);
+            if (product == null)
+            {
+                throw new ProductDoesNotExistsException(productDetail.ProductName);
+            }
+            await _productRepository.AddOrUpdateProductInStore(new StoreProduct
+            {
+                ProductName = productDetail.ProductName,
+                StoreId = productDetail.StoreId,
+                Amount = productDetail.Amount,
+                Price = productDetail.Price,
+                Store = store,
+                Product = product
+            });
         }
 
         public async Task UpdateProductStorePrice(int storeId, string productName, int price)
@@ -148,20 +171,24 @@ namespace Lab3.Services
             {
                 throw new NoProductsInStoreException(storeId);
             }
-            FindProductCombo(storeProducts, money, [], combos);
+            FindProductCombo(storeProducts, money, new List<ProductPurchaseDTO>(), combos);
             return combos;
         }
 
         private void FindProductCombo(List<StoreProduct> productsInStore, int remainingMoney, List<ProductPurchaseDTO> currentCombo,  List<List<ProductPurchaseDTO>> combos, int searchStart = 0)
         {
-
-            if (remainingMoney <=0)
+            if (searchStart >= productsInStore.Count && remainingMoney >= 0 && currentCombo.Count > 0)
             {
-                combos.Add(currentCombo);
+                combos.Add(new List<ProductPurchaseDTO>(currentCombo));
+                return;
+            }
+            if (remainingMoney <=0 && currentCombo.Count > 0)
+            {
+                combos.Add(new List<ProductPurchaseDTO>(currentCombo));
                 return;
             }
 
-            for (int itemIdx = 0; itemIdx < productsInStore.Count; itemIdx ++)
+            for (int itemIdx = searchStart; itemIdx < productsInStore.Count; itemIdx ++)
             {
                 var item = productsInStore[itemIdx];
                 for (int itemCount = 1; itemCount < item.Amount; itemCount++)
@@ -178,12 +205,61 @@ namespace Lab3.Services
                         currentCombo.Add(new ProductPurchaseDTO { Amount = itemCount, ProductName = item.ProductName  });
                     } else
                     {
-                        productInCombo.Amount += itemCount;
+                        productInCombo.Amount = itemCount;
                     }
 
-                    FindProductCombo(productsInStore, remainingMoney - totalPrice, currentCombo, combos, itemIdx);
+                    FindProductCombo(productsInStore, remainingMoney - totalPrice, currentCombo, combos, itemIdx+1);
+                    currentCombo.RemoveAt(currentCombo.Count - 1);
                 }
             }
+        }
+
+        public async Task<StorePurchaseDTO> FindCheapestStoreForList(List<ProductPurchaseDTO> list)
+        {
+            Store cheapestStore = null;
+            int lowestCost = int.MaxValue;
+            var stores = await _storeRepository.GetAllStoresAsync();
+            foreach (var store in stores)
+            {
+                var storeProducts = await _productRepository.GetProductsByStoreIdAsync(store.Id);
+                int totalCost = 0;
+                bool hasAllProducts = true;
+                foreach (var product in list)
+                {
+                    var storeProduct = storeProducts.FirstOrDefault(p => p.ProductName == product.ProductName);
+                    if (storeProduct == null || storeProduct.Amount < product.Amount)
+                    {
+                        hasAllProducts = false;
+                        break;
+                    }
+                    totalCost += product.Amount * storeProduct.Price;
+                }
+
+                if (hasAllProducts && totalCost < lowestCost)
+                {
+                    cheapestStore = store;
+                    lowestCost = totalCost;
+                }
+            }
+            if (cheapestStore != null)
+            {
+                return new StorePurchaseDTO
+                {
+                    Store = _mapper.Map<StoreDTO>(cheapestStore),
+                    Cost = lowestCost
+                };
+            }
+            throw new NoSuitableStoresException();
+        }
+
+        public async Task<List<ProductInStoreDTO>> GetAllStoreProducts(int storeId)
+        {
+            var products = await _productRepository.GetProductsByStoreIdAsync(storeId);
+            if (products == null)
+            {
+                throw new NoProductsInStoreException(storeId);
+            }
+            return _mapper.Map<List<ProductInStoreDTO>>(products);
         }
 
     }

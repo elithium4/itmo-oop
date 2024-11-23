@@ -22,15 +22,15 @@ namespace Lab3.Repositories.SQL
                 .HasKey(sp => new { sp.StoreId, sp.ProductName });
 
             // Настройка отношений
-            modelBuilder.Entity<StoreProduct>()
-                .HasOne(sp => sp.Store)
-                .WithMany(s => s.StoreProducts)
-                .HasForeignKey(sp => sp.StoreId);
+            //modelBuilder.Entity<StoreProduct>()
+            //    .HasOne(sp => sp.Store)
+            //    .WithMany(s => s.StoreProducts)
+            //    .HasForeignKey(sp => sp.StoreId);
 
-            modelBuilder.Entity<StoreProduct>()
-                .HasOne(sp => sp.Product)
-                .WithMany(p => p.StoreProducts)
-                .HasForeignKey(sp => sp.ProductName);
+            //modelBuilder.Entity<StoreProduct>()
+            //    .HasOne(sp => sp.Product)
+            //    .WithMany(p => p.StoreProducts)
+            //    .HasForeignKey(sp => sp.ProductName);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

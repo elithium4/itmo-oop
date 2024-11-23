@@ -9,11 +9,11 @@ namespace Lab3.Services
         public MappingProfile()
         {
             CreateMap<Store, StoreDTO>();
-            CreateMap<Store, FullStoreInfoDTO>();
             CreateMap<Product, ProductDTO>();
             CreateMap<StoreProduct, StoreProductDTO>();
             CreateMap<StoreProduct, ProductInStoreDTO>();
             CreateMap<StoreDTO, Store>();
+            CreateMap<CreateStoreDTO, Store>();
             CreateMap<ProductDTO, Product>();
             CreateMap<StoreProductDTO, StoreProduct>();
         }

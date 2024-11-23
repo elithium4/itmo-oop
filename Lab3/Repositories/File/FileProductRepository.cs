@@ -6,14 +6,10 @@ using System.Xml.Linq;
 
 namespace Lab3.Repositories.File
 {
-    public class FileProductRepository : IProductRepository
+    public class FileProductRepository : BaseFileRepository, IProductRepository
     {
-        private readonly string _filePath;
 
-        public FileProductRepository(string filePath)
-        {
-            _filePath = filePath;
-        }
+        public FileProductRepository(string filePath) : base(filePath) { }
 
         public async Task CreateProductAsync(Product product)
         {
@@ -30,7 +26,7 @@ namespace Lab3.Repositories.File
                 var parts = line.Split(',');
                 return new Product
                 {
-                    Name = parts[1],
+                    Name = parts[0],
                 };
             }).ToList();
         }
@@ -40,13 +36,13 @@ namespace Lab3.Repositories.File
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             string pattern = $@"^{Regex.Escape(name)},";
             Regex regex = new Regex(pattern);
-            var line = lines.FirstOrDefault(l => regex.IsMatch(l));
+            var line = lines.FirstOrDefault(l => (l == name || regex.IsMatch(l)));
             if (line == null) return null;
 
             var parts = line.Split(',');
             return new Product
             {
-                Name = parts[1],
+                Name = parts[0],
             };
         }
 
@@ -55,7 +51,7 @@ namespace Lab3.Repositories.File
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             string pattern = $@"^{Regex.Escape(name)},";
             Regex regex = new Regex(pattern);
-            var line = lines.FirstOrDefault(l => regex.IsMatch(l));
+            var line = lines.FirstOrDefault(l => (l == name || regex.IsMatch(l)));
             if (line == null) return null;
 
             var parts = line.Split(',');
@@ -108,7 +104,6 @@ namespace Lab3.Repositories.File
         {
             var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
             var products = lines.ToList();
-            bool productFound = false;
 
             for (int i = 0; i < products.Count; i++)
             {
@@ -116,23 +111,22 @@ namespace Lab3.Repositories.File
 
                 if (fields[0] == entity.ProductName)
                 {
-                    productFound = true;
 
                     for (int storeIdx = 1; storeIdx < fields.Length; storeIdx += 3)
                     {
                         if (int.Parse(fields[storeIdx]) == entity.StoreId)
                         {
                             fields[storeIdx + 1] = entity.Amount.ToString();
-                            fields[storeIdx + 1] = entity.Price.ToString();
+                            fields[storeIdx + 2] = entity.Price.ToString();
                             products[i] = string.Join(",", fields);
-                            System.IO.File.WriteAllLines(_filePath, lines);
+                            System.IO.File.WriteAllLines(_filePath, products);
                             return;
                         }
                     }
-                    fields.Append(entity.StoreId.ToString());
-                    fields.Append(entity.Amount.ToString());
-                    fields.Append(entity.Price.ToString());
-                    System.IO.File.WriteAllLines(_filePath, lines);
+                    var newStoreInfo = new[] { entity.StoreId.ToString(), entity.Amount.ToString(), entity.Price.ToString() };
+                    var updatedFields = fields.Concat(newStoreInfo);
+                    products[i] = string.Join(",", updatedFields);
+                    System.IO.File.WriteAllLines(_filePath, products);
                     return;
                 }
             }
@@ -142,10 +136,26 @@ namespace Lab3.Repositories.File
 
         public async Task<StoreProduct> GetProductInStoreAsync(int storeId, string productName)
         {
-            var productInfo = await GetProductInAllStores(productName);
-            if (productInfo != null)
+
+            var lines = await System.IO.File.ReadAllLinesAsync(_filePath);
+            string pattern = $@"^{Regex.Escape(productName)},";
+            Regex regex = new Regex(pattern);
+            var line = lines.FirstOrDefault(l => (l == productName || regex.IsMatch(l)));
+            if (line == null) return null;
+
+            var parts = line.Split(',');
+            for (int i = 1; i < parts.Length; i += 3)
             {
-                return productInfo.Find(s => s.StoreId == storeId);
+                if (int.Parse(parts[i]) == storeId)
+                {
+                    return (new StoreProduct
+                    {
+                        ProductName = productName,
+                        StoreId = int.Parse(parts[i]),
+                        Amount = int.Parse(parts[i + 1]),
+                        Price = int.Parse(parts[i + 2])
+                    });
+                }
             }
             return null;
         }
@@ -155,7 +165,7 @@ namespace Lab3.Repositories.File
             var lines = (await System.IO.File.ReadAllLinesAsync(_filePath)).ToList();
             string pattern = $@"^{Regex.Escape(entity.ProductName)},";
             Regex regex = new Regex(pattern);
-            var idx = lines.FindIndex(l => regex.IsMatch(l));
+            var idx = lines.FindIndex(l => (l == entity.ProductName || regex.IsMatch(l)));
             if (idx == -1) return;
 
             var parts = lines[idx].Split(',');

@@ -19,19 +19,19 @@ namespace Lab3.Services
             return _mapper.Map<List<StoreDTO>>(stores);
         }
 
-        public async Task CreateStore(StoreDTO store)
+        public async Task CreateStore(CreateStoreDTO store)
         {
-            await _repository.CreateStoreAsync(new Store { Name = store.Name, Address = store.Address });
+            await _repository.CreateStoreAsync(_mapper.Map<Store>(store));
         }
 
-        public async Task<FullStoreInfoDTO> GetStoreById(int storeId)
+        public async Task<StoreDTO> GetStoreById(int storeId)
         {
             var storeInfo = await _repository.GetStoreByIdAsync(storeId);
             if (storeInfo == null)
             {
                 throw new StoreDoesNotExistException(storeId);
             }
-            return _mapper.Map<FullStoreInfoDTO>(storeInfo);
+            return _mapper.Map<StoreDTO>(storeInfo);
         }
     }
 }

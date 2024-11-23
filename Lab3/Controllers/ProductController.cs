@@ -11,11 +11,15 @@ namespace Lab3.Controllers
     {
         private readonly ProductService _productService;
 
+
         public ProductController(ProductService productService)
         {
             _productService = productService;
         }
 
+        /// <summary>
+        /// Получить список всех товаров.
+        /// </summary>
         [HttpGet("all")]
         public async Task<ActionResult<List<ProductDTO>>> GetAllProducts()
         {
@@ -23,6 +27,10 @@ namespace Lab3.Controllers
             return Ok(stores);
         }
 
+        /// <summary>
+        /// Создать товар
+        /// </summary>
+        /// <param name="name">Название товара</param>
         [HttpPost("create")]
         public async Task<ActionResult> CreateProduct(string name)
         {
