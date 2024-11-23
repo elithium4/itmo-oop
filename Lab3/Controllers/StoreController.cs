@@ -60,7 +60,7 @@ namespace Lab3.Controllers
         /// Добавить товар в магазин
         /// </summary>
         /// <param name="product">Данные о добавляемом товаре</param>
-        [HttpPut("addProducts")]
+        [HttpPut("addProduct")]
         public async Task<ActionResult> AddProductToStore(StoreProductDTO product)
         {
             try
