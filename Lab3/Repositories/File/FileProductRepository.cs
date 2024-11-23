@@ -131,7 +131,6 @@ namespace Lab3.Repositories.File
                 }
             }
 
-            throw new Exception($"Product with name {entity.ProductName} doesn't exist");
         }
 
         public async Task<StoreProduct> GetProductInStoreAsync(int storeId, string productName)
