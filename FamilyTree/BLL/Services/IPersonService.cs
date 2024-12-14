@@ -10,7 +10,7 @@ namespace FamilyTree.BLL.Services
         public Task CreateParentChildRelationship(int childId, int parentId);
         public Task DeleteParentChildRelationship(int childId, int parentId);
         public Task CreateMarriage(int firstSpouseId, int secondSpouseId);
-        public Task DeleteMarriage(int firstSpouseId, int secondSpouseId);
+        public Task DeleteMarriage(int personId);
         public Task<int> CalculateAgeAtBirth(int childId, int ancestorId);
         public Task<List<PersonDTO>> GetParentsById(int Id);
         public Task<List<PersonDTO>> GetChildrenById(int Id);

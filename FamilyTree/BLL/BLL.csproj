@@ -12,7 +12,4 @@
 	<ItemGroup>
 		<ProjectReference Include="..\DAL\DAL.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Exceptions\" />
-	</ItemGroup>
 </Project>
