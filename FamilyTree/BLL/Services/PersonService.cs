@@ -18,9 +18,28 @@ namespace FamilyTree.BLL.Services
             _mapper = mapper;
         }
 
-        public Task<int> CalculateAgeAtBirth(int childId, int ancestorId)
+        public async Task<int> CalculateAncestorAgeAtBirth(int childId, int ancestorId)
         {
-            throw new NotImplementedException();
+            var child = await GetPersonByIdAsync(childId);
+            if (child == null)
+            {
+                throw new PersonDoesNotExistException(childId);
+            }
+            var ancestor = await GetPersonByIdAsync(ancestorId);
+            if (child == null)
+            {
+                throw new PersonDoesNotExistException(ancestorId);
+            }
+            if (child.Birthdate < ancestor.Birthdate)
+            {
+                throw new Exception();
+            }
+            int pureYearsDifference = child.Birthdate.Year - ancestor.Birthdate.Year;
+            if (child.Birthdate < ancestor.Birthdate.AddYears(pureYearsDifference))
+            {
+                pureYearsDifference--;
+            }
+            return pureYearsDifference;
         }
 
         public async Task CreateMarriage(int firstSpouseId, int secondSpouseId)

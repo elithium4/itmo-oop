@@ -8,7 +8,7 @@ namespace FamilyTree.DAL.Model
         public string Surname { get; set; }
         public string Patronymic { get; set; }
         public Gender Gender { get; set; }
-        public DateTime BithDate { get; set; }
+        public DateTime Birthdate { get; set; }
 
         public int? SpouseId { get; set; }
         public List<int> Parents {  get; set; }
