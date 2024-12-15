@@ -1,6 +1,7 @@
 ﻿@page "/person/{id:int}"
 @rendermode RenderMode.InteractiveServer
 @inject IPersonService PersonService
+@inject ITreeService TreeService
 @using FamilyTree.BLL.Services
 @using FamilyTree.BLL.DTO
 @using FamilyTreeWebview.Components.Layout
@@ -27,6 +28,42 @@
 </section>
 <section>
     <h4 class="subtitle">Information</h4>
+    <div class="formField">
+        <label>Include in tree: 
+            @if (isInTree)
+            {
+                <span>yes</span>
+            } else
+            {
+                <span>no</span>
+            }
+        </label>
+        <button @onclick="ToggleTreeStatus">
+            @if (isInTree)
+            {
+                <span>Remove from tree</span>
+            }
+            else
+            {
+                <span>Add to tree</span>
+            }
+        </button>
+    </div>
+    <div>
+        Calculate this person age at someone's birth
+        <InputSelect @bind-Value="AgeComparingPersonId" class="inputField">
+            @foreach (var person in people)
+            {
+                <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+            }
+        </InputSelect>
+        <button class="button" @onclick="CalculateBirthAge">Calculate</button>
+        @if (AgeDifference.HasValue)
+        {
+            <span class="infoLine">This person was @AgeDifference y.o.</span>
+        }
+        @InfoErrorMessage
+    </div>
 </section>
 <section>
     <h4 class="subtitle">Set relationship</h4>
@@ -80,10 +117,14 @@
     private List<PersonDTO> people;
     private List<PersonDTO> children = new List<PersonDTO>();
     private List<PersonDTO> parents = new List<PersonDTO>();
+    private bool isInTree = false;
 
     private string RelationshipType = "parent";
     private int RelatedPersonId;
+    private int AgeComparingPersonId;
     private string ErrorMessage = null;
+    private int? AgeDifference = null;
+    private string InfoErrorMessage = null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -92,11 +133,27 @@
         people = PersonService.GetAllPeopleAsync().Result;
         children = PersonService.GetChildrenById(Id).Result;
         parents = PersonService.GetParentsById(Id).Result;
+        var tree = await TreeService.GetOrCreateTree();
+        isInTree = false;
 
+    }
+
+    private async Task ToggleTreeStatus()
+    {
+        if (isInTree)
+        {
+            await TreeService.DeleteMemberAsync(Id);
+        } else
+        {
+            await TreeService.AddMemberAsync(Id);
+        }
+        var tree = await TreeService.GetOrCreateTree();
+        isInTree = tree.Members.Contains(Id);
     }
 
     private async Task AddRelationship()
     {
+        Console.WriteLine($"Add {RelationshipType}");
         ErrorMessage = null;
         if (RelatedPersonId == null) return;
 
@@ -105,31 +162,18 @@
             switch (RelationshipType)
             {
                 case "parent":
-                    PersonService.CreateParentChildRelationship(RelatedPersonId, person.Id).ContinueWith(t =>
-                    {
-                        if (t.IsCompleted)
-                        {
-                            children = PersonService.GetChildrenById(Id).Result;
-                        }
-                    });
+                    await PersonService.CreateParentChildRelationship(RelatedPersonId, person.Id);
+                    children = await PersonService.GetChildrenById(Id);
+                    Console.WriteLine("Got children");
+                    children.ForEach(c => Console.WriteLine(c.Name));
                     break;
                 case "child":
-                    PersonService.CreateParentChildRelationship(person.Id, RelatedPersonId).ContinueWith(t =>
-                    {
-                        if (t.IsCompleted)
-                        {
-                            parents = PersonService.GetParentsById(Id).Result;
-                        }
-                    });
+                    await PersonService.CreateParentChildRelationship(person.Id, RelatedPersonId);
+                    parents = await PersonService.GetParentsById(Id);
                     break;
                 case "spouse":
-                    PersonService.CreateMarriage(person.Id, RelatedPersonId).ContinueWith(t =>
-                    {
-                        if (t.IsCompleted)
-                        {
-                            spouse = PersonService.GetPersonSpouseAsync(Id).Result;
-                        }
-                    });
+                    await PersonService.CreateMarriage(person.Id, RelatedPersonId);
+                    spouse =await  PersonService.GetPersonSpouseAsync(Id);
                     break;
                 default:
                     break;
@@ -137,6 +181,19 @@
         } catch (Exception e)
         {
             ErrorMessage = e.Message;
+        }
+        Console.WriteLine("Done");
+    }
+
+    private async Task CalculateBirthAge()
+    {
+        InfoErrorMessage = null;
+        try
+        {
+            AgeDifference = await PersonService.CalculateAncestorAgeAtBirth(AgeComparingPersonId, Id);
+        } catch(Exception e)
+        {
+            InfoErrorMessage = e.Message;
         }
     }
 

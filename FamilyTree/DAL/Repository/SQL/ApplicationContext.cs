@@ -6,6 +6,7 @@ namespace FamilyTree.DAL.Repository.SQL
     public class ApplicationContext : DbContext
     {
         public DbSet<Person> People { get; set; } = null!;
+        public DbSet<Tree> Tree { get; set; } = null!;
 
         public ApplicationContext()
         {

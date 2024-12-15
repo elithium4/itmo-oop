@@ -1,15 +1,57 @@
 ﻿@page "/tree"
+@rendermode RenderMode.InteractiveServer
+@inject ITreeService TreeService
+@using FamilyTree.BLL.Services
+@using FamilyTree.DAL.Model
+@using Microsoft.JSInterop;
+
 
 <h3 class="title">Tree View</h3>
-<button class="button">Build Tree</button>
-<script src="~/lib/treant-js-1.0/Treant.js"></script>
-<script>
-    function renderFamilyTree(treeData) {
-        new Treant(treeData);
-    }
-</script>
+<button class="button" @onclick="BuildTree">Build tree</button>
+ <div id="chart"></div>
+ <script>
+     function renderFamilyTree(treeData) {
+         console.log(JSON.stringify(treeData))
+        console.log("Execute", new Treant(treeData))
+         new Treant(treeData);
+     }
+ </script>
 
 
 @code {
+    private List<Person> people;
+    [Inject]
+    private IJSRuntime JS { get; set; }
 
-}
+    protected override async Task OnInitializedAsync()
+    {
+        people = await TreeService.GetMembersAsync();
+    }
+
+    private async Task BuildTree()
+    {
+        var treeData = GenerateTreeData();
+        await JS.InvokeVoidAsync("renderFamilyTree", treeData);
+    }
+
+    private object GenerateTreeData()
+    {
+        object nodes = new { };
+        foreach (var person in people)
+        {
+            Console.WriteLine($"{person.Id} {person.Children.Count} {person.Parents.Count}");
+            if (person.Parents.Count == 0 && person.Children.Count == 0 && !person.SpouseId.HasValue) continue;
+            nodes = new
+            {
+                text = new { name = $"{person.Name} {person.Surname}" },
+                children = person.Children.Select(childId =>
+                {
+                    var child = people.First(p => p.Id == childId);
+                    return new { text = new { name = $"{child.Name} {child.Surname}" } };
+                }).ToArray()
+            };
+        };
+        // Console.WriteLine(nodes.Count);
+        return new { chart = new { container = "#chart" }, nodeStructure = nodes };
+     }
+ }

@@ -5,6 +5,7 @@ using FamilyTree.DAL.Model;
 using FamilyTree.DAL.Repository;
 using FamilyTree.BLL.Exceptions;
 using BLL.Exceptions;
+using System.Collections.Generic;
 
 namespace FamilyTree.BLL.Services
 {
@@ -32,7 +33,7 @@ namespace FamilyTree.BLL.Services
             }
             if (child.Birthdate < ancestor.Birthdate)
             {
-                throw new Exception();
+                throw new BadAgeDifferenceException();
             }
             int pureYearsDifference = child.Birthdate.Year - ancestor.Birthdate.Year;
             if (child.Birthdate < ancestor.Birthdate.AddYears(pureYearsDifference))
@@ -253,6 +254,11 @@ namespace FamilyTree.BLL.Services
                 throw new PersonDoesNotExistException(Id);
             }
             List<PersonDTO> childrenData = [];
+            foreach (var item in person.Children)
+            {
+                var childData = _mapper.Map < PersonDTO > (await _repository.GetPersonByIdAsync(item));
+                childrenData.Add(childData);
+            }
             return childrenData;
         }
 
@@ -263,6 +269,11 @@ namespace FamilyTree.BLL.Services
                 throw new PersonDoesNotExistException(Id);
             }
             List<PersonDTO> parentsData = [];
+            foreach (var item in person.Parents)
+            {
+                var parentData = _mapper.Map<PersonDTO>(await _repository.GetPersonByIdAsync(item));
+                parentsData.Add(parentData);
+            }
             return parentsData;
         }
 
