@@ -1,0 +1,49 @@
+﻿
+@inject NavigationManager Navigation
+@using FamilyTree.BLL.DTO
+
+
+@if (people == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="people__table">
+        <thead class="people__thead">
+            <tr class="people__tr">
+                <th class="people__th">Id</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Patronymic</th>
+                <th>Date of birth</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var person in people)
+            {
+                <tr class="people__tr" @onclick="() => NavigateToPerson(person.Id)">
+                    <td>@person.Id</td>
+                    <td>@person.Name</td>
+                    <td>@person.Surname</td>
+                    <td>@person.Patronymic</td>
+                    <td>@person.Birthdate.ToString("dd.MM.yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public List<PersonDTO> people { get; set; } = null;
+    [Parameter]
+    public string? ButtonName { get; set;  }
+    [Parameter]
+    public EventCallback<int>? HandleAction { get; set; }
+
+    private void NavigateToPerson(int id)
+    {
+        Navigation.NavigateTo($"/person/{id}");
+    }
+}

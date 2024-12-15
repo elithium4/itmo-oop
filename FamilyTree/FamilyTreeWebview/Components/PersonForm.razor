@@ -1,0 +1,58 @@
+﻿@rendermode RenderMode.InteractiveServer
+@using FamilyTree.BLL.Services
+@using FamilyTree.BLL.DTO
+@using FamilyTree.DAL.Model
+@inject IPersonService PersonService
+
+<EditForm Model="person" OnValidSubmit="HandleValidSubmit" FormName="create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="formField">
+        <label>Имя:</label>
+        <InputText @bind-Value="person.Name" class="inputField" p />
+        <ValidationMessage For="@(() => person.Name)" />
+    </div>
+
+    <div class="formField">
+        <label>Фамилия:</label>
+        <InputText @bind-Value="person.Surname" class="inputField" />
+        <ValidationMessage For="@(() => person.Surname)" />
+    </div>
+
+    <div class="formField">
+        <label>Отчество:</label>
+        <InputText @bind-Value="person.Patronymic" class="inputField" />
+        <ValidationMessage For="@(() => person.Patronymic)" />
+    </div>
+
+    <div class="formField">
+        <label>Пол:</label>
+        <InputSelect @bind-Value="person.Gender" class="inputField">
+            <option value="">-- Выберите пол --</option>
+            <option value="@Gender.Male">Мужской</option>
+            <option value="@Gender.Female">Женский</option>
+        </InputSelect>
+        <ValidationMessage For="@(() => person.Gender)" />
+    </div>
+
+    <div class="formField">
+        <label>Дата рождения:</label>
+        <InputDate @bind-Value="person.Birthdate" class="inputField" />
+        <ValidationMessage For="@(() => person.Birthdate)" />
+    </div>
+
+    <button type="submit" class="button">Submit</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public  CreatePersonDTO person { get; set; }
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        await OnSubmit.InvokeAsync(null);
+    }
+}
