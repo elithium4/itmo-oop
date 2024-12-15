@@ -82,5 +82,10 @@ namespace FamilyTree.BLL.Services
             return members;
         }
 
+        public async Task EmptyTree()
+        {
+            var tree = await GetOrCreateTree();
+            await _repository.DeleteTree(tree);
+        }
     }
 }

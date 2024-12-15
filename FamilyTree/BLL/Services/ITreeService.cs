@@ -9,5 +9,7 @@ namespace FamilyTree.BLL.Services
         public Task AddMemberAsync(int Id);
         public Task DeleteMemberAsync(int Id);
         public Task<List<Person>> GetMembersAsync();
+
+        public Task EmptyTree();
     }
 }

@@ -7,12 +7,13 @@
 
 
 <h3 class="title">Tree View</h3>
-<button class="button" @onclick="BuildTree">Build tree</button>
+<button class="button" @onclick="BuildTree">Display tree</button>
+<button class="button" @onclick="EmptyTree">Empty tree</button>
  <div id="tree"></div>
  <script>
      function renderFamilyTree(treeData) {
          console.log(JSON.stringify(treeData))
-        new FamilyTree("#tree", treeData);
+        new FamilyTree("#tree", { ...treeData, enableSearch: false, enablePan: false, interactive: false });
      }
  </script>
 
@@ -26,6 +27,7 @@
         public int? mid { get; set; } 
         public int? fid { get; set; }
         public string name { get; set; }
+        public string gender { get; set; }
     }
 
 
@@ -34,6 +36,11 @@
     private IJSRuntime JS { get; set; }
 
     protected override async Task OnInitializedAsync()
+    {
+        await GetMembers();
+    }
+
+    private async Task GetMembers()
     {
         people = await TreeService.GetMembersAsync();
     }
@@ -54,10 +61,12 @@
                 {
                     id = person.Id,
                     name = $"{person.Surname} {person.Name} {person.Patronymic}",
+                    gender = person.Gender.ToString().ToLower()
                 };
+            Console.WriteLine($"{person.Name} {person.SpouseId}");
             if (person.SpouseId.HasValue)
             {
-                viewPerson.pids = new List<int>(person.SpouseId.Value);
+                viewPerson.pids = new List<int>() { person.SpouseId.Value };
             }
             if (person.Parents.Count > 0)
             {
@@ -72,8 +81,16 @@
         };
         // Console.WriteLine(nodes.Count);
         return new { nodeBinding = new {
-        field_0 = "name"
-        },
-        nodes = nodes.ToArray() };
-     }
+                field_0 = "name"
+            },
+            nodes = nodes.ToArray() };
+    }
+
+    private async void EmptyTree()
+    {
+        await TreeService.EmptyTree();
+        await GetMembers();
+        await BuildTree();
+    }
+
  }

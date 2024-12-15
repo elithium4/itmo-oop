@@ -27,27 +27,21 @@
     }
 </section>
 <section>
+    <div>
     <h4 class="subtitle">Information</h4>
-    <div class="formField">
-        <label>Include in tree: 
-            @if (isInTree)
-            {
-                <span>yes</span>
-            } else
-            {
-                <span>no</span>
-            }
-        </label>
-        <button @onclick="ToggleTreeStatus">
-            @if (isInTree)
-            {
-                <span>Remove from tree</span>
-            }
-            else
-            {
-                <span>Add to tree</span>
-            }
-        </button>
+    <div class="infoLine">
+        <label>@String.Join(" ", "Include in tree:", isInTree ? "yes" : "no") </label>
+    </div>
+    <button class="button" @onclick="ToggleTreeStatus">
+        @if (isInTree)
+        {
+            <span>Remove from tree</span>
+        }
+        else
+        {
+            <span>Add to tree</span>
+        }
+    </button>
     </div>
     <div>
         Calculate this person age at someone's birth
@@ -134,7 +128,7 @@
         children = PersonService.GetChildrenById(Id).Result;
         parents = PersonService.GetParentsById(Id).Result;
         var tree = await TreeService.GetOrCreateTree();
-        isInTree = false;
+        isInTree = tree.Members.Contains(Id);
 
     }
 

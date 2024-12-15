@@ -32,9 +32,10 @@ namespace FamilyTree.DAL.Repository.SQL
             await _context.SaveChangesAsync();
         }
 
-        public Task EmptyTree(int id)
+        public async Task DeleteTree(Tree tree)
         {
-            throw new NotImplementedException();
+            _context.Tree.Remove(tree);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Tree> GetTreeById(int id)

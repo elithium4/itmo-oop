@@ -7,7 +7,7 @@ namespace FamilyTree.DAL.Repository
     {
         Task CreateTree();
         Task UpdateTree(Tree tree);
-        Task EmptyTree(int id);
+        Task DeleteTree(Tree tree);
         Task<Tree> GetTreeById(int id);
         Task <List<Tree>> GetAllTree();
     }
