@@ -58,6 +58,11 @@ namespace FamilyTree.BLL.Services
             {
                 throw new PersonDoesNotExistException(secondSpouseId);
             }
+            var canMarry = await CanMarry(firstSpouseId, secondSpouseId);
+            if (!canMarry)
+            {
+                throw new IllegalMarriageCandidateException();
+            }
             if (firstSpouse.SpouseId != null)
             {
                 await ResetMarriage(firstSpouse);
@@ -70,6 +75,16 @@ namespace FamilyTree.BLL.Services
             secondSpouse.SpouseId = firstSpouseId;
             await _repository.UpdatePersonAsync(firstSpouse);
             await _repository.UpdatePersonAsync(secondSpouse);
+        }
+
+        private async Task<bool> CanMarry(int firstSpouseId, int secondSpouseId)
+        {
+            var relatives = await GetAllRelativesId(firstSpouseId);
+            if (relatives.Contains(secondSpouseId))
+            {
+                return false;
+            }
+            return true;
         }
 
         public async Task DeleteMarriage(int Id)
@@ -116,7 +131,44 @@ namespace FamilyTree.BLL.Services
             {
                 throw new PersonDoesNotExistException(parentId);
             }
+            if (child.Parents.Count >= 2)
+            {
+                throw new IllegalParentsCountException();
+            }
+            if (parent.Birthdate >= child.Birthdate)
+            {
+                throw new IllegalAgeDifferenceException();
+            }
+            if (parent.Children.Contains(childId))
+            {
+                return;
+            }
+            var canHaveRelationship = await CanHaveParentChildRelationship(parent, child);
+            if (!canHaveRelationship)
+            {
+                throw new IllegalParentChildRelationshipException();
+            }
+            child.Parents.Add(parentId);
+            parent.Children.Add(childId);
+            await _repository.UpdatePersonAsync(child);
+            child.Parents.ForEach(p => Console.WriteLine(p));
+            await _repository.UpdatePersonAsync(parent);
+            parent.Children.ForEach(p => Console.WriteLine(p));
+        }
 
+        private async Task<bool> CanHaveParentChildRelationship(Person parent, Person child)
+        {
+            if (parent.SpouseId == child.Id || child.SpouseId == parent.Id)
+            {
+                return false;
+            }
+            var relatives = await GetAllRelativesId(parent.Id);
+            if (relatives.Contains(child.Id))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public async Task CreatePerson(CreatePersonDTO person)
@@ -155,6 +207,38 @@ namespace FamilyTree.BLL.Services
             throw new NotImplementedException();
         }
 
+        private async Task<HashSet<int>> GetAllRelativesId(int personId)
+        {
+            HashSet<int> relatives = new HashSet<int>();
+            var checkQueue = new Queue<int>();
+            checkQueue.Enqueue(personId);
+            while (checkQueue.Count > 0)
+            {
+                int id = checkQueue.Dequeue();
+                var person = await _repository.GetPersonByIdAsync(id);
+                if (person == null)
+                {
+                    continue;
+                }
+                person.Parents.ForEach(p =>
+                {
+                    if (relatives.Add(p))
+                    {
+                        checkQueue.Enqueue(p);
+                    }
+                });
+                person.Children.ForEach(p =>
+                {
+                    if (relatives.Add(p))
+                    {
+                        checkQueue.Enqueue(p);
+                    }
+                });
+            }
+            return relatives;
+
+        }
+
         public async Task<List<PersonDTO>> GetAllPeopleAsync()
         {
             var people = await _repository.GetAllPeopleAsync();
@@ -169,9 +253,6 @@ namespace FamilyTree.BLL.Services
                 throw new PersonDoesNotExistException(Id);
             }
             List<PersonDTO> childrenData = [];
-            foreach (var child in person.Children) {
-                childrenData.Add(await GetPersonByIdAsync(child));
-            }
             return childrenData;
         }
 
@@ -182,10 +263,6 @@ namespace FamilyTree.BLL.Services
                 throw new PersonDoesNotExistException(Id);
             }
             List<PersonDTO> parentsData = [];
-            foreach (var child in person.Parents)
-            {
-                parentsData.Add(await GetPersonByIdAsync(child));
-            }
             return parentsData;
         }
 
@@ -197,6 +274,25 @@ namespace FamilyTree.BLL.Services
                 throw new PersonDoesNotExistException(Id);
             }
             return _mapper.Map<PersonDTO>(person);
+        }
+
+        public async Task<PersonDTO> GetPersonSpouseAsync(int Id)
+        {
+            var person = await _repository.GetPersonByIdAsync(Id);
+            if (person == null)
+            {
+                throw new PersonDoesNotExistException(Id);
+            }
+            if (!person.SpouseId.HasValue)
+            {
+                return null;
+            }
+            var spouse = await _repository.GetPersonByIdAsync(person.SpouseId.Value);
+            if (spouse == null)
+            {
+                throw new PersonDoesNotExistException(person.SpouseId.Value);
+            }
+            return _mapper.Map<PersonDTO>(spouse);
         }
     }
 }

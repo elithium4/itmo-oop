@@ -1,51 +1,52 @@
 ﻿@page "/create"
+@rendermode RenderMode.InteractiveServer
 @using FamilyTree.BLL.Services
 @using FamilyTree.BLL.DTO
 @using FamilyTree.DAL.Model
 @inject IPersonService PersonService
 @inject NavigationManager NavigationManager
 
-<h3>Create New Person</h3>
+<h3 class="title">Create New Person</h3>
 
 <EditForm Model="createPerson" OnValidSubmit="HandleValidSubmit" FormName="create">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="mb-3">
-        <label>Имя:</label>
-        <InputText @bind-Value="createPerson.Name" class="form-control"  />
+    <div class="formField">
+        <label>Name:</label>
+        <InputText @bind-Value="createPerson.Name" class="inputField" p />
         <ValidationMessage For="@(() => createPerson.Name)" />
     </div>
 
-    <div class="mb-3">
-        <label>Фамилия:</label>
-        <InputText @bind-Value="createPerson.Surname" class="form-control" />
+    <div class="formField">
+        <label>Surname:</label>
+        <InputText @bind-Value="createPerson.Surname" class="inputField" />
         <ValidationMessage For="@(() => createPerson.Surname)" />
     </div>
 
-    <div class="mb-3">
-        <label>Отчество:</label>
-        <InputText @bind-Value="createPerson.Patronymic" class="form-control" />
+    <div class="formField">
+        <label>Patronimyc (optional):</label>
+        <InputText @bind-Value="createPerson.Patronymic" class="inputField" />
         <ValidationMessage For="@(() => createPerson.Patronymic)" />
     </div>
 
-    <div class="mb-3">
-        <label>Пол:</label>
-        <InputSelect @bind-Value="createPerson.Gender" class="form-control">
-            <option value="">-- Выберите пол --</option>
-            <option value="@Gender.Male">Мужской</option>
-            <option value="@Gender.Female">Женский</option>
+    <div class="formField">
+        <label>Gender:</label>
+        <InputSelect @bind-Value="createPerson.Gender" class="inputField">
+            <option value="">-- Select gander --</option>
+            <option value="@Gender.Male">Male</option>
+            <option value="@Gender.Female">Female</option>
         </InputSelect>
         <ValidationMessage For="@(() => createPerson.Gender)" />
     </div>
 
-    <div class="mb-3">
-        <label>Дата рождения:</label>
-        <InputDate @bind-Value="createPerson.Birthdate" class="form-control" />
+    <div class="formField">
+        <label>Date of birth:</label>
+        <InputDate @bind-Value="createPerson.Birthdate" class="inputField" />
         <ValidationMessage For="@(() => createPerson.Birthdate)" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="button">Create</button>
 </EditForm>
 
 @code {

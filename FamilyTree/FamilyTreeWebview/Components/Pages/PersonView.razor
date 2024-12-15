@@ -1,0 +1,143 @@
+﻿@page "/person/{id:int}"
+@rendermode RenderMode.InteractiveServer
+@inject IPersonService PersonService
+@using FamilyTree.BLL.Services
+@using FamilyTree.BLL.DTO
+@using FamilyTreeWebview.Components.Layout
+
+<h3 class="title">@if (person == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        @string.Join(" ", person.Surname, person.Name, person.Patronymic)
+    }
+</h3>
+<section>
+    <span class="infoLine">Name: @person.Name</span>
+    <span class="infoLine">Surname: @person.Surname</span>
+    <span class="infoLine">Patronymic: @person.Patronymic</span>
+    <span class="infoLine">Gender: @person.Gender</span>
+    <span class="infoLine">Date of birth: @person.Birthdate.ToString("dd.MM.yyyy")</span>
+    @if (spouse != null)
+    {
+        <span class="infoLine">Spouse: @string.Join(" ", spouse.Surname, spouse.Name, spouse.Patronymic)</span>
+    }
+</section>
+<section>
+    <h4 class="subtitle">Information</h4>
+</section>
+<section>
+    <h4 class="subtitle">Set relationship</h4>
+        <InputSelect @bind-Value="RelationshipType" class="inputField">
+            <option value="">-- Select relationship type --</option>
+            <option value="parent">Is parent of</option>
+            <option value="child">Is child of...</option>
+            <option value="spouse">Is spouse of...</option>
+        </InputSelect>
+
+    <InputSelect @bind-Value="RelatedPersonId" class="inputField">
+        @foreach (var person in people)
+        {
+            <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+        }
+    </InputSelect>
+    @ErrorMessage
+        <button @onclick="AddRelationship" class="button">Add</button>
+</section>
+<section>
+    <h4 class="subtitle">Parents</h4>
+    @if (parents.Count == 0)
+    {
+        <p><em>No parents found</em></p>
+    }
+    else
+    {
+        <PeopleTable people="@parents"/>
+    }
+</section>
+<section>
+    <h4 class="subtitle">Children</h4>
+    @if (children.Count == 0)
+    {
+        <p><em>No children found</em></p>
+    }
+    else
+    {
+        <PeopleTable people="@children" />
+    }
+</section>
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PersonDTO person;
+    private PersonDTO spouse;
+    private List<PersonDTO> people;
+    private List<PersonDTO> children = new List<PersonDTO>();
+    private List<PersonDTO> parents = new List<PersonDTO>();
+
+    private string RelationshipType = "parent";
+    private int RelatedPersonId;
+    private string ErrorMessage = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        person = PersonService.GetPersonByIdAsync(Id).Result;
+        spouse = PersonService.GetPersonSpouseAsync(Id).Result;
+        people = PersonService.GetAllPeopleAsync().Result;
+        children = PersonService.GetChildrenById(Id).Result;
+        parents = PersonService.GetParentsById(Id).Result;
+
+    }
+
+    private async Task AddRelationship()
+    {
+        ErrorMessage = null;
+        if (RelatedPersonId == null) return;
+
+        try
+        {
+            switch (RelationshipType)
+            {
+                case "parent":
+                    PersonService.CreateParentChildRelationship(RelatedPersonId, person.Id).ContinueWith(t =>
+                    {
+                        if (t.IsCompleted)
+                        {
+                            children = PersonService.GetChildrenById(Id).Result;
+                        }
+                    });
+                    break;
+                case "child":
+                    PersonService.CreateParentChildRelationship(person.Id, RelatedPersonId).ContinueWith(t =>
+                    {
+                        if (t.IsCompleted)
+                        {
+                            parents = PersonService.GetParentsById(Id).Result;
+                        }
+                    });
+                    break;
+                case "spouse":
+                    PersonService.CreateMarriage(person.Id, RelatedPersonId).ContinueWith(t =>
+                    {
+                        if (t.IsCompleted)
+                        {
+                            spouse = PersonService.GetPersonSpouseAsync(Id).Result;
+                        }
+                    });
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e)
+        {
+            ErrorMessage = e.Message;
+        }
+    }
+
+}

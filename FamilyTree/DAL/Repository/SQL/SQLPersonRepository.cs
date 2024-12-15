@@ -39,6 +39,7 @@ namespace FamilyTree.DAL.Repository.SQL
             {
                 _context.People.Update(person);
             }
+            await _context.SaveChangesAsync();
         }
 
         public async Task RemovePersonAsync(Person person)

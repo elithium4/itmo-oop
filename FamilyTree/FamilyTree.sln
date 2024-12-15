@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BLL", "BLL\BLL.csproj", "{05D395E0-B9E6-4A03-BC25-77495008BC65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FamilyTreeWebview", "FamilyTreeWebview\FamilyTreeWebview.csproj", "{94C3FCF7-81DE-48AD-B7E9-DB45E2550F58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FamilyTreeWebview", "FamilyTreeWebview\FamilyTreeWebview.csproj", "{94C3FCF7-81DE-48AD-B7E9-DB45E2550F58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

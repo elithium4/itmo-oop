@@ -1,44 +1,28 @@
-﻿@page "/people"
+﻿@page "/"
+@rendermode RenderMode.InteractiveServer
+@inject NavigationManager Navigation
 @using FamilyTree.BLL.Services
 @using FamilyTree.BLL.DTO
 @inject IPersonService PersonService
+@using FamilyTreeWebview.Components.Layout
 
-<h3>Список людей</h3>
+<h3 class="title">People in base</h3>
 
-<a href="/create">Добавить нового</a>
+<a class="button" href="/create">Add</a>
 
-@if (people == null)
-{
-    <p><em>Загрузка...</em></p>
-}
-else
-{
-    <table class="people__table">
-        <thead class="people__thead">
-            <tr class="people__tr">
-                <th class="people__th">Id</th>
-                <th>Имя</th>
-                <th>Возраст</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var person in people)
-            {
-                <tr class="people__tr">
-                    <td>@person.Id</td>
-                    <td>@person.Name</td>
-                    <td>@person.Birthdate</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<PeopleTable people="@people"/>
+
 
 @code {
-    private IEnumerable<PersonDTO> people;
+    private List<PersonDTO> people;
 
     protected override async Task OnInitializedAsync()
     {
         people = await PersonService.GetAllPeopleAsync();
+    }
+
+    private void NavigateToPerson(int id)
+    {
+        Navigation.NavigateTo($"/person/{id}");
     }
 }

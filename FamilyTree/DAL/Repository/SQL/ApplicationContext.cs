@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using FamilyTree.DAL.Model;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Reflection.Emit;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace FamilyTree.DAL.Repository.SQL
 {
@@ -14,12 +11,6 @@ namespace FamilyTree.DAL.Repository.SQL
         {
             Database.EnsureCreated();
         }
-
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<StoreProduct>()
-        //        .HasKey(sp => new { sp.StoreId, sp.ProductName });
-        //}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

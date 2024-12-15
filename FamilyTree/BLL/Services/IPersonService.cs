@@ -15,6 +15,7 @@ namespace FamilyTree.BLL.Services
         public Task<List<PersonDTO>> GetParentsById(int Id);
         public Task<List<PersonDTO>> GetChildrenById(int Id);
         public Task<List<PersonDTO>> FindCommonRelatives(int firstPersonId, int secondPersonId);
+        public Task<PersonDTO> GetPersonSpouseAsync(int Id);
 
     }
 }
