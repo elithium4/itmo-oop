@@ -10,7 +10,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddScoped<IPersonRepository, SQLPersonRepository>();
+builder.Services.AddScoped<ITreeRepository, SQLTreeRepository>();
 builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped<ITreeService, TreeService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 var app = builder.Build();
 

@@ -82,10 +82,5 @@ namespace FamilyTree.BLL.Services
             return members;
         }
 
-        //public async List<TreePersonDTO> GetTreeHierarchy()
-        //{
-        //    var members = await GetMembersAsync();
-
-        //}
     }
 }
