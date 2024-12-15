@@ -1,5 +1,4 @@
 ﻿using FamilyTree.DAL.Model;
-using FamilyTree.DAL.Repositories.SQL;
 using Microsoft.EntityFrameworkCore;
 
 namespace FamilyTree.DAL.Repository.SQL

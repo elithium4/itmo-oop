@@ -1,0 +1,13 @@
+﻿.nav-top {
+    position: sticky;
+    top: 0;
+    width: 100vw;
+    height: 40px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    font-weight: 600;
+    gap: 8px;
+    background: #4a6b74;
+    color: #fcf6ec;
+}

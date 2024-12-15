@@ -6,7 +6,7 @@ namespace FamilyTree.DAL.Model
         public int Id { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
-        public string Patronymic { get; set; }
+        public string? Patronymic { get; set; }
         public Gender Gender { get; set; }
         public DateTime Birthdate { get; set; }
 

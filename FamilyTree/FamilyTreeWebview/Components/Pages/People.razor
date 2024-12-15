@@ -1,0 +1,44 @@
+﻿@page "/people"
+@using FamilyTree.BLL.Services
+@using FamilyTree.BLL.DTO
+@inject IPersonService PersonService
+
+<h3>Список людей</h3>
+
+<a href="/create">Добавить нового</a>
+
+@if (people == null)
+{
+    <p><em>Загрузка...</em></p>
+}
+else
+{
+    <table class="people__table">
+        <thead class="people__thead">
+            <tr class="people__tr">
+                <th class="people__th">Id</th>
+                <th>Имя</th>
+                <th>Возраст</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var person in people)
+            {
+                <tr class="people__tr">
+                    <td>@person.Id</td>
+                    <td>@person.Name</td>
+                    <td>@person.Birthdate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<PersonDTO> people;
+
+    protected override async Task OnInitializedAsync()
+    {
+        people = await PersonService.GetAllPeopleAsync();
+    }
+}

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Reflection.Emit;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace FamilyTree.DAL.Repositories.SQL
+namespace FamilyTree.DAL.Repository.SQL
 {
     public class ApplicationContext : DbContext
     {
