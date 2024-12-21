@@ -63,7 +63,6 @@
                     name = $"{person.Surname} {person.Name} {person.Patronymic}",
                     gender = person.Gender.ToString().ToLower()
                 };
-            Console.WriteLine($"{person.Name} {person.SpouseId}");
             if (person.SpouseId.HasValue)
             {
                 viewPerson.pids = new List<int>() { person.SpouseId.Value };
@@ -79,7 +78,6 @@
             nodes.Add(viewPerson);
 
         };
-        // Console.WriteLine(nodes.Count);
         return new { nodeBinding = new {
                 field_0 = "name"
             },

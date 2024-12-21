@@ -46,36 +46,62 @@
     <div>
         Calculate this person age at someone's birth
         <InputSelect @bind-Value="AgeComparingPersonId" class="inputField">
+            <option value="">-- Select other person --</option>
             @foreach (var person in people)
             {
-                <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+                @if (person.Id != Id)
+                {
+                    <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+                }
             }
         </InputSelect>
-        <button class="button" @onclick="CalculateBirthAge">Calculate</button>
+        <button class="button" @onclick="CalculateBirthAge" disabled="@(!AgeComparingPersonId.HasValue)">Calculate</button>
         @if (AgeDifference.HasValue)
         {
             <span class="infoLine">This person was @AgeDifference y.o.</span>
         }
         @InfoErrorMessage
     </div>
+    <div>
+        Find common relatives for this person and someone else
+        <InputSelect @bind-Value="CommonRelativePersonId" class="inputField">
+            <option value="">-- Select other person --</option>
+            @foreach (var person in people)
+            {
+                @if (person.Id != Id)
+                {
+                    <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+                }
+            }
+        </InputSelect>
+        <button class="button" @onclick="FindCommonRelatives" disabled="@(!CommonRelativePersonId.HasValue)">Find</button>
+        @foreach (var person in commonRelatives)
+        {
+                <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+        }
+        @CommonRelativeErrorMessage
+    </div>
 </section>
 <section>
     <h4 class="subtitle">Set relationship</h4>
         <InputSelect @bind-Value="RelationshipType" class="inputField">
-            <option value="">-- Select relationship type --</option>
             <option value="parent">Is parent of</option>
             <option value="child">Is child of...</option>
             <option value="spouse">Is spouse of...</option>
         </InputSelect>
 
     <InputSelect @bind-Value="RelatedPersonId" class="inputField">
+        <option value="">-- Select other person --</option>
         @foreach (var person in people)
         {
-            <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+            @if (person.Id != Id)
+            {
+                <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+            }
         }
     </InputSelect>
     @ErrorMessage
-        <button @onclick="AddRelationship" class="button">Add</button>
+        <button @onclick="AddRelationship" class="button" disabled="@(!RelatedPersonId.HasValue)">Add</button>
 </section>
 <section>
     <h4 class="subtitle">Parents</h4>
@@ -114,11 +140,14 @@
     private bool isInTree = false;
 
     private string RelationshipType = "parent";
-    private int RelatedPersonId;
-    private int AgeComparingPersonId;
+    private int? RelatedPersonId;
+    private int? AgeComparingPersonId;
     private string ErrorMessage = null;
     private int? AgeDifference = null;
     private string InfoErrorMessage = null;
+    private int? CommonRelativePersonId;
+    private string CommonRelativeErrorMessage = null;
+    private List<PersonDTO> commonRelatives = new List<PersonDTO>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -147,26 +176,24 @@
 
     private async Task AddRelationship()
     {
-        Console.WriteLine($"Add {RelationshipType}");
         ErrorMessage = null;
-        if (RelatedPersonId == null) return;
+        if (!RelatedPersonId.HasValue) return;
 
         try
         {
             switch (RelationshipType)
             {
                 case "parent":
-                    await PersonService.CreateParentChildRelationship(RelatedPersonId, person.Id);
+                    await PersonService.CreateParentChildRelationship(RelatedPersonId.Value, person.Id);
                     children = await PersonService.GetChildrenById(Id);
-                    Console.WriteLine("Got children");
                     children.ForEach(c => Console.WriteLine(c.Name));
                     break;
                 case "child":
-                    await PersonService.CreateParentChildRelationship(person.Id, RelatedPersonId);
+                    await PersonService.CreateParentChildRelationship(person.Id, RelatedPersonId.Value);
                     parents = await PersonService.GetParentsById(Id);
                     break;
                 case "spouse":
-                    await PersonService.CreateMarriage(person.Id, RelatedPersonId);
+                    await PersonService.CreateMarriage(person.Id, RelatedPersonId.Value);
                     spouse =await  PersonService.GetPersonSpouseAsync(Id);
                     break;
                 default:
@@ -182,13 +209,26 @@
     private async Task CalculateBirthAge()
     {
         InfoErrorMessage = null;
+        if (!AgeComparingPersonId.HasValue) return;
         try
         {
-            AgeDifference = await PersonService.CalculateAncestorAgeAtBirth(AgeComparingPersonId, Id);
+            AgeDifference = await PersonService.CalculateAncestorAgeAtBirth(AgeComparingPersonId.Value, Id);
         } catch(Exception e)
         {
             InfoErrorMessage = e.Message;
         }
     }
 
+    private async Task FindCommonRelatives()
+    {
+        CommonRelativeErrorMessage = null;
+        if (!CommonRelativePersonId.HasValue) return;
+        try
+        {
+            commonRelatives = await PersonService.FindCommonRelatives(Id, CommonRelativePersonId.Value);
+        } catch (Exception e)
+        {
+            CommonRelativeErrorMessage = e.Message;
+        }
+    }
 }

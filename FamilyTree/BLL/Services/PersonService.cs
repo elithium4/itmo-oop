@@ -3,9 +3,6 @@ using FamilyTree.BLL.DTO;
 using FamilyTree.BLL.Exceptions;
 using FamilyTree.DAL.Model;
 using FamilyTree.DAL.Repository;
-using FamilyTree.BLL.Exceptions;
-using BLL.Exceptions;
-using System.Collections.Generic;
 
 namespace FamilyTree.BLL.Services
 {
@@ -152,9 +149,7 @@ namespace FamilyTree.BLL.Services
             child.Parents.Add(parentId);
             parent.Children.Add(childId);
             await _repository.UpdatePersonAsync(child);
-            child.Parents.ForEach(p => Console.WriteLine(p));
             await _repository.UpdatePersonAsync(parent);
-            parent.Children.ForEach(p => Console.WriteLine(p));
         }
 
         private async Task<bool> CanHaveParentChildRelationship(Person parent, Person child)
@@ -203,9 +198,83 @@ namespace FamilyTree.BLL.Services
             await _repository.UpdatePersonAsync(parent);
         }
 
-        public Task<List<PersonDTO>> FindCommonRelatives(int firstPersonId, int secondPersonId)
+        public async Task<List<PersonDTO>> FindCommonRelatives(int firstPersonId, int secondPersonId)
         {
-            throw new NotImplementedException();
+            HashSet<int> checkedFirstRelatives = new HashSet<int>();
+            HashSet<int> checkedSecondRelatives = new HashSet<int>();
+
+            Queue<int> firstRelativesQueue = new Queue<int>();
+            Queue<int> secondRelativesQueue = new Queue<int>();
+
+            firstRelativesQueue.Enqueue(firstPersonId);
+            secondRelativesQueue.Enqueue(secondPersonId);
+            List<PersonDTO> commonRelativesPair = new List<PersonDTO>();
+
+            while (firstRelativesQueue.Count > 0 || secondRelativesQueue.Count > 0)
+            {
+                if (firstRelativesQueue.Count > 0)
+                {
+                    int currentFirst = firstRelativesQueue.Dequeue();
+                    if (checkedSecondRelatives.Contains(currentFirst))
+                    {
+                        int firstParentId = currentFirst;
+                        var firstParent = await GetPersonByIdAsync(currentFirst);
+                        if (firstParent == null)
+                        {
+                            throw new PersonDoesNotExistException(currentFirst);
+                        }
+                        commonRelativesPair.Add(firstParent);
+                        if (firstParentId != secondPersonId && firstParent.SpouseId.HasValue)
+                        {
+                            var secondParent = await GetPersonByIdAsync(firstParent.SpouseId.Value);
+                            commonRelativesPair.Add(secondParent);
+                        }
+                        return commonRelativesPair;
+                    }
+
+                    checkedFirstRelatives.Add(currentFirst);
+                    var ancestors = await GetParentsById(currentFirst);
+                    foreach (var item in ancestors)
+                    {
+                        if (!checkedFirstRelatives.Contains(item.Id)) ;
+                        {
+                            firstRelativesQueue.Enqueue(item.Id);
+                        }
+                    }
+                }
+
+                if (secondRelativesQueue.Count > 0)
+                {
+                    int currentSecond = secondRelativesQueue.Dequeue();
+                    if (checkedFirstRelatives.Contains(currentSecond))
+                    {
+                        int firstParentId = currentSecond;
+                        var firstParent = await GetPersonByIdAsync(currentSecond);
+                        if (firstParent == null)
+                        {
+                            throw new PersonDoesNotExistException(currentSecond);
+                        }
+                        commonRelativesPair.Add(firstParent);
+                        if (firstParentId != firstPersonId && firstParent.SpouseId.HasValue)
+                        {
+                            var secondParent = await GetPersonByIdAsync(firstParent.SpouseId.Value);
+                            commonRelativesPair.Add(secondParent);
+                        }
+                        return commonRelativesPair;
+                    }
+
+                    checkedSecondRelatives.Add(currentSecond);
+                    var ancestors = await GetParentsById(currentSecond);
+                    foreach (var item in ancestors)
+                    {
+                        if (!checkedSecondRelatives.Contains(item.Id)) ;
+                        {
+                            secondRelativesQueue.Enqueue(item.Id);
+                        }
+                    }
+                }
+            }
+            throw new NoCommonRelativesException(firstPersonId, secondPersonId);
         }
 
         private async Task<HashSet<int>> GetAllRelativesId(int personId)

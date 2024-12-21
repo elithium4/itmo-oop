@@ -3,7 +3,6 @@
 
 using AutoMapper;
 using FamilyTree.BLL.Exceptions;
-using FamilyTree.BLL.DTO;
 using FamilyTree.DAL.Model;
 using FamilyTree.DAL.Repository;
 
@@ -31,7 +30,6 @@ namespace FamilyTree.BLL.Services
             var tree = trees[0];
             if (tree.Members.Contains(personId)) return;
             tree.Members.Add(personId);
-            Console.WriteLine($"Adding {personId}");
             _repository.UpdateTree(tree);
         }
 
