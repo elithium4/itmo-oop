@@ -1,0 +1,28 @@
+﻿@page "/"
+@rendermode RenderMode.InteractiveServer
+@inject NavigationManager Navigation
+@using FamilyTree.BLL.Services
+@using FamilyTree.BLL.DTO
+@inject IPersonService PersonService
+@using FamilyTreeWebview.Components.Layout
+
+<h3 class="title">People in base</h3>
+
+<a class="button" href="/create">Add</a>
+
+<PeopleTable people="@people"/>
+
+
+@code {
+    private List<PersonDTO> people;
+
+    protected override async Task OnInitializedAsync()
+    {
+        people = await PersonService.GetAllPeopleAsync();
+    }
+
+    private void NavigateToPerson(int id)
+    {
+        Navigation.NavigateTo($"/person/{id}");
+    }
+}

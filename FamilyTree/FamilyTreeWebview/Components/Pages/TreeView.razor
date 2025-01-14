@@ -1,0 +1,94 @@
+﻿@page "/tree"
+@rendermode RenderMode.InteractiveServer
+@inject ITreeService TreeService
+@using FamilyTree.BLL.Services
+@using FamilyTree.DAL.Model
+@using Microsoft.JSInterop;
+
+
+<h3 class="title">Tree View</h3>
+<button class="button" @onclick="BuildTree">Display tree</button>
+<button class="button" @onclick="EmptyTree">Empty tree</button>
+ <div id="tree"></div>
+ <script>
+     function renderFamilyTree(treeData) {
+         console.log(JSON.stringify(treeData))
+        new FamilyTree("#tree", { ...treeData, enableSearch: false, enablePan: false, interactive: false });
+     }
+ </script>
+
+
+@code {
+
+    public class TreeViewPerson
+    {
+        public int id { get; set; }
+        public List<int> pids { get; set; } = new List<int>(); 
+        public int? mid { get; set; } 
+        public int? fid { get; set; }
+        public string name { get; set; }
+        public string gender { get; set; }
+    }
+
+
+    private List<Person> people;
+    [Inject]
+    private IJSRuntime JS { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetMembers();
+    }
+
+    private async Task GetMembers()
+    {
+        people = await TreeService.GetMembersAsync();
+    }
+
+    private async Task BuildTree()
+    {
+        var treeData = GenerateTreeData();
+        await JS.InvokeVoidAsync("renderFamilyTree", treeData);
+    }
+
+    private object GenerateTreeData()
+    {
+        List<TreeViewPerson> nodes = new List<TreeViewPerson>();
+
+        foreach (var person in people)
+        {
+            var viewPerson = new TreeViewPerson
+                {
+                    id = person.Id,
+                    name = $"{person.Surname} {person.Name} {person.Patronymic}",
+                    gender = person.Gender.ToString().ToLower()
+                };
+            if (person.SpouseId.HasValue)
+            {
+                viewPerson.pids = new List<int>() { person.SpouseId.Value };
+            }
+            if (person.Parents.Count > 0)
+            {
+                viewPerson.mid = person.Parents[0];
+            }
+            if (person.Parents.Count > 1)
+            {
+                viewPerson.fid = person.Parents[1];
+            }
+            nodes.Add(viewPerson);
+
+        };
+        return new { nodeBinding = new {
+                field_0 = "name"
+            },
+            nodes = nodes.ToArray() };
+    }
+
+    private async void EmptyTree()
+    {
+        await TreeService.EmptyTree();
+        await GetMembers();
+        await BuildTree();
+    }
+
+ }

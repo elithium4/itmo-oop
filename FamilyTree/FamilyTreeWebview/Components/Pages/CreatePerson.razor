@@ -1,0 +1,60 @@
+﻿@page "/create"
+@rendermode RenderMode.InteractiveServer
+@using FamilyTree.BLL.Services
+@using FamilyTree.BLL.DTO
+@using FamilyTree.DAL.Model
+@inject IPersonService PersonService
+@inject NavigationManager NavigationManager
+
+<h3 class="title">Create New Person</h3>
+
+<EditForm Model="createPerson" OnValidSubmit="HandleValidSubmit" FormName="create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="formField">
+        <label>Name:</label>
+        <InputText @bind-Value="createPerson.Name" class="inputField" p />
+        <ValidationMessage For="@(() => createPerson.Name)" />
+    </div>
+
+    <div class="formField">
+        <label>Surname:</label>
+        <InputText @bind-Value="createPerson.Surname" class="inputField" />
+        <ValidationMessage For="@(() => createPerson.Surname)" />
+    </div>
+
+    <div class="formField">
+        <label>Patronimyc (optional):</label>
+        <InputText @bind-Value="createPerson.Patronymic" class="inputField" />
+        <ValidationMessage For="@(() => createPerson.Patronymic)" />
+    </div>
+
+    <div class="formField">
+        <label>Gender:</label>
+        <InputSelect @bind-Value="createPerson.Gender" class="inputField">
+            <option value="">-- Select gender --</option>
+            <option value="@Gender.Male">Male</option>
+            <option value="@Gender.Female">Female</option>
+        </InputSelect>
+        <ValidationMessage For="@(() => createPerson.Gender)" />
+    </div>
+
+    <div class="formField">
+        <label>Date of birth:</label>
+        <InputDate @bind-Value="createPerson.Birthdate" class="inputField" />
+        <ValidationMessage For="@(() => createPerson.Birthdate)" />
+    </div>
+
+    <button type="submit" class="button">Create</button>
+</EditForm>
+
+@code {
+    private CreatePersonDTO createPerson = new CreatePersonDTO();
+
+    private async Task HandleValidSubmit()
+    {
+        await PersonService.CreatePerson(createPerson);
+        NavigationManager.NavigateTo("/");
+    }
+}

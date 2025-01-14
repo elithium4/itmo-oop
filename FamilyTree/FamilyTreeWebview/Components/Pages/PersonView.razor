@@ -1,0 +1,234 @@
+﻿@page "/person/{id:int}"
+@rendermode RenderMode.InteractiveServer
+@inject IPersonService PersonService
+@inject ITreeService TreeService
+@using FamilyTree.BLL.Services
+@using FamilyTree.BLL.DTO
+@using FamilyTreeWebview.Components.Layout
+
+<h3 class="title">@if (person == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        @string.Join(" ", person.Surname, person.Name, person.Patronymic)
+    }
+</h3>
+<section>
+    <span class="infoLine">Name: @person.Name</span>
+    <span class="infoLine">Surname: @person.Surname</span>
+    <span class="infoLine">Patronymic: @person.Patronymic</span>
+    <span class="infoLine">Gender: @person.Gender</span>
+    <span class="infoLine">Date of birth: @person.Birthdate.ToString("dd.MM.yyyy")</span>
+    @if (spouse != null)
+    {
+        <span class="infoLine">Spouse: @string.Join(" ", spouse.Surname, spouse.Name, spouse.Patronymic)</span>
+    }
+</section>
+<section>
+    <div>
+    <h4 class="subtitle">Information</h4>
+    <div class="infoLine">
+        <label>@String.Join(" ", "Include in tree:", isInTree ? "yes" : "no") </label>
+    </div>
+    <button class="button" @onclick="ToggleTreeStatus">
+        @if (isInTree)
+        {
+            <span>Remove from tree</span>
+        }
+        else
+        {
+            <span>Add to tree</span>
+        }
+    </button>
+    </div>
+    <div>
+        Calculate this person age at someone's birth
+        <InputSelect @bind-Value="AgeComparingPersonId" class="inputField">
+            <option value="">-- Select other person --</option>
+            @foreach (var person in people)
+            {
+                @if (person.Id != Id)
+                {
+                    <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+                }
+            }
+        </InputSelect>
+        <button class="button" @onclick="CalculateBirthAge" disabled="@(!AgeComparingPersonId.HasValue)">Calculate</button>
+        @if (AgeDifference.HasValue)
+        {
+            <span class="infoLine">This person was @AgeDifference y.o.</span>
+        }
+        @InfoErrorMessage
+    </div>
+    <div>
+        Find common relatives for this person and someone else
+        <InputSelect @bind-Value="CommonRelativePersonId" class="inputField">
+            <option value="">-- Select other person --</option>
+            @foreach (var person in people)
+            {
+                @if (person.Id != Id)
+                {
+                    <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+                }
+            }
+        </InputSelect>
+        <button class="button" @onclick="FindCommonRelatives" disabled="@(!CommonRelativePersonId.HasValue)">Find</button>
+        @foreach (var person in commonRelatives)
+        {
+                <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+        }
+        @CommonRelativeErrorMessage
+    </div>
+</section>
+<section>
+    <h4 class="subtitle">Set relationship</h4>
+        <InputSelect @bind-Value="RelationshipType" class="inputField">
+            <option value="parent">Is parent of</option>
+            <option value="child">Is child of...</option>
+            <option value="spouse">Is spouse of...</option>
+        </InputSelect>
+
+    <InputSelect @bind-Value="RelatedPersonId" class="inputField">
+        <option value="">-- Select other person --</option>
+        @foreach (var person in people)
+        {
+            @if (person.Id != Id)
+            {
+                <option value="@person.Id">@person.Name @person.Surname @person.Patronymic</option>
+            }
+        }
+    </InputSelect>
+    @ErrorMessage
+        <button @onclick="AddRelationship" class="button" disabled="@(!RelatedPersonId.HasValue)">Add</button>
+</section>
+<section>
+    <h4 class="subtitle">Parents</h4>
+    @if (parents.Count == 0)
+    {
+        <p><em>No parents found</em></p>
+    }
+    else
+    {
+        <PeopleTable people="@parents"/>
+    }
+</section>
+<section>
+    <h4 class="subtitle">Children</h4>
+    @if (children.Count == 0)
+    {
+        <p><em>No children found</em></p>
+    }
+    else
+    {
+        <PeopleTable people="@children" />
+    }
+</section>
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PersonDTO person;
+    private PersonDTO spouse;
+    private List<PersonDTO> people;
+    private List<PersonDTO> children = new List<PersonDTO>();
+    private List<PersonDTO> parents = new List<PersonDTO>();
+    private bool isInTree = false;
+
+    private string RelationshipType = "parent";
+    private int? RelatedPersonId;
+    private int? AgeComparingPersonId;
+    private string ErrorMessage = null;
+    private int? AgeDifference = null;
+    private string InfoErrorMessage = null;
+    private int? CommonRelativePersonId;
+    private string CommonRelativeErrorMessage = null;
+    private List<PersonDTO> commonRelatives = new List<PersonDTO>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        person = PersonService.GetPersonByIdAsync(Id).Result;
+        spouse = PersonService.GetPersonSpouseAsync(Id).Result;
+        people = PersonService.GetAllPeopleAsync().Result;
+        children = PersonService.GetChildrenById(Id).Result;
+        parents = PersonService.GetParentsById(Id).Result;
+        var tree = await TreeService.GetOrCreateTree();
+        isInTree = tree.Members.Contains(Id);
+
+    }
+
+    private async Task ToggleTreeStatus()
+    {
+        if (isInTree)
+        {
+            await TreeService.DeleteMemberAsync(Id);
+        } else
+        {
+            await TreeService.AddMemberAsync(Id);
+        }
+        var tree = await TreeService.GetOrCreateTree();
+        isInTree = tree.Members.Contains(Id);
+    }
+
+    private async Task AddRelationship()
+    {
+        ErrorMessage = null;
+        if (!RelatedPersonId.HasValue) return;
+
+        try
+        {
+            switch (RelationshipType)
+            {
+                case "parent":
+                    await PersonService.CreateParentChildRelationship(RelatedPersonId.Value, person.Id);
+                    children = await PersonService.GetChildrenById(Id);
+                    children.ForEach(c => Console.WriteLine(c.Name));
+                    break;
+                case "child":
+                    await PersonService.CreateParentChildRelationship(person.Id, RelatedPersonId.Value);
+                    parents = await PersonService.GetParentsById(Id);
+                    break;
+                case "spouse":
+                    await PersonService.CreateMarriage(person.Id, RelatedPersonId.Value);
+                    spouse =await  PersonService.GetPersonSpouseAsync(Id);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e)
+        {
+            ErrorMessage = e.Message;
+        }
+        Console.WriteLine("Done");
+    }
+
+    private async Task CalculateBirthAge()
+    {
+        InfoErrorMessage = null;
+        if (!AgeComparingPersonId.HasValue) return;
+        try
+        {
+            AgeDifference = await PersonService.CalculateAncestorAgeAtBirth(AgeComparingPersonId.Value, Id);
+        } catch(Exception e)
+        {
+            InfoErrorMessage = e.Message;
+        }
+    }
+
+    private async Task FindCommonRelatives()
+    {
+        CommonRelativeErrorMessage = null;
+        if (!CommonRelativePersonId.HasValue) return;
+        try
+        {
+            commonRelatives = await PersonService.FindCommonRelatives(Id, CommonRelativePersonId.Value);
+        } catch (Exception e)
+        {
+            CommonRelativeErrorMessage = e.Message;
+        }
+    }
+}
